@@ -1,0 +1,40 @@
+# Lokální konfigurační soubory
+config.local.php
+*.local.php
+
+# Hesla a citlivé údaje
+.env
+.env.local
+secrets.php
+
+# Systémové soubory macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+
+# IDE a editory
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings
+
+# Logové soubory
+*.log
+logs/
+
+# Dočasné soubory
+tmp/
+temp/
+cache/
+
+# Balíčky a moduly
+node_modules/
+vendor/
+composer.lock
+
+# OS specifické
+.env.*.local
