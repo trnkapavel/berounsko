@@ -11,7 +11,11 @@ Interaktivní webová aplikace pro rezervaci komentovaných vycházek v oblasti 
 - **Google Sheets integrace** - Ukládání rezervací do tabulky
 - **Responzivní design** - Funguje na mobilu, tabletu i desktopu
 
-## 📋 Dostupné Vycházky
+## � Náhled Aplikace
+
+![Berounsko.net Screenshot](screenshot/screenshot.png)
+
+## �📋 Dostupné Vycházky
 
 | Trasa | Délka | Cena | Náročnost |
 |-------|-------|------|-----------|
@@ -34,6 +38,8 @@ berounsko/
 ├── index.php              # Hlavní stránka s modálním oknem
 ├── rezervace.php          # Backend pro zpracování rezervací
 ├── rezervace_data.json    # Lokální ukládat rezervací
+├── screenshot/            # Screenshoty aplikace
+│   └── screenshot.png     # Náhled aplikace
 ├── README.md             # Tato dokumentace
 ├── DOKUMENTACE.md        # Technická dokumentace
 └── .gitignore            # Git ignore pravidla
