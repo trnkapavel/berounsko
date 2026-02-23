@@ -4,32 +4,34 @@ Interaktivní webová aplikace pro rezervaci komentovaných vycházek v oblasti 
 
 ## 🎯 Hlavní Funkce
 
-- **Interaktivní výběr tras** - 4 různé vycházky s detailním popisem
+- **Interaktivní výběr tras** - 4 různé vycházky s detailním popisem a animovaným rozbalováním
 - **Rezervační formulář** - Jednoduchý formulář s výpočtem ceny v reálném čase
-- **Online platba** - QR kód pro snadnou platbu převodem (SPAYDformat)
-- **Automatické e-maily** - Potvrzovací zprávy pro uživatele i správce
+- **Online platba** - QR kód pro snadnou platbu převodem (SPAYD formát)
+- **Automatické e-maily** - Potvrzovací zprávy pro uživatele i správce s `.ics` přílohou (kalendářní pozvánka)
 - **Google Sheets integrace** - Ukládání rezervací do tabulky
+- **SEO & Open Graph** - Meta tagy pro vyhledávače, Facebook, WhatsApp a Twitter
 - **Responzivní design** - Funguje na mobilu, tabletu i desktopu
+- **Animace** - Plynulé přechody modalu, puntíků náročnosti i obrázků tras
 
-## � Náhled Aplikace
+## 📷 Náhled Aplikace
 
 ![Berounsko.net Screenshot](screenshot/screenshot.png)
 
-## �📋 Dostupné Vycházky
+## 📋 Dostupné Vycházky
 
 | Trasa | Délka | Cena | Náročnost |
 |-------|-------|------|-----------|
-| CHKO Český kras | 8,5 km | Zdarma | 🟠 Střední |
-| Svatojanský okruh | 6 km | 100 Kč | 🔴 Těžká |
-| CHKO Křivoklátsko | 11 km | 100 Kč | 🟢 Lehká |
-| Alkazar | 5,5 km | 100 Kč | 🟢 Velmi lehká |
+| Okruh Srbsko, Chlum | 4 km | Zdarma | 🔴 Velmi těžká |
+| Svatojanský okruh | 4 km | 100 Kč | 🔴 Těžká |
+| Brdatka (Křivoklátsko) | 9,5 km | 100 Kč | 🟠 Střední |
+| Alkazar | 4 km | 100 Kč | 🟢 Velmi lehká |
 
 ## 🛠️ Technologie
 
 - **Frontend**: HTML5, CSS3, JavaScript (Vanilla)
 - **Backend**: PHP 7.0+
 - **Data**: JSON (rezervace_data.json)
-- **Integrace**: Google Sheets API, SPAYDformat pro QR platby
+- **Integrace**: Google Sheets API, SPAYD formát pro QR platby, iCal (.ics) pro kalendáře
 
 ## 📁 Struktura Projektu
 
@@ -37,19 +39,23 @@ Interaktivní webová aplikace pro rezervaci komentovaných vycházek v oblasti 
 berounsko/
 ├── index.php              # Hlavní stránka s modálním oknem
 ├── rezervace.php          # Backend pro zpracování rezervací
-├── rezervace_data.json    # Lokální ukládat rezervací
+├── img/                   # Fotografie tras
+│   ├── srbsko-chlum.jpg
+│   ├── svatojansky-okruh.jpg
+│   ├── brdatka.jpg
+│   └── alkazar.jpg
 ├── screenshot/            # Screenshoty aplikace
 │   └── screenshot.png     # Náhled aplikace
-├── README.md             # Tato dokumentace
-├── DOKUMENTACE.md        # Technická dokumentace
-└── .gitignore            # Git ignore pravidla
+├── README.md              # Tato dokumentace
+├── DOKUMENTACE.md         # Technická dokumentace
+└── .gitignore             # Git ignore pravidla
 ```
 
 ## 🚀 Instalace a Spuštění
 
 ### Požadavky
 - PHP 7.0 nebo vyšší
-- Webový server (Apache, Nginx, PHP built-in server)
+- Webový server (Apache, Nginx, MAMP, XAMPP)
 - E-mail (pro odesílání potvrzení)
 
 ### Lokální spuštění
@@ -72,10 +78,10 @@ http://localhost:8000
 
 ### Nasazení na hosting
 
-1. Uploads soubory na web server (přes FTP/SFTP)
-2. Uprav e-mail v `rezervace.php` (řádek 5)
-3. Uprav Google Apps Script URL (řádek 9)
-4. Otestuj formulář
+1. Nahrajte soubory na web server (přes FTP/SFTP)
+2. Upravte e-mail v `rezervace.php` (řádek 5)
+3. Upravte Google Apps Script URL (řádek 9)
+4. Otestujte formulář
 
 ## ⚙️ Konfigurace
 
@@ -94,7 +100,7 @@ $googleScriptUrl = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
 
 ### Ceny tras
 
-V souboru `index.php` (ve funkci `walks`) lze nastavit cenu pro každou trasu:
+V souboru `index.php` (ve struktuře `walks`) lze nastavit cenu pro každou trasu:
 
 ```javascript
 'kras': {
@@ -105,6 +111,22 @@ V souboru `index.php` (ve funkci `walks`) lze nastavit cenu pro každou trasu:
     pricePerPerson: 100,    // 100 Kč na osobu
     // ...
 }
+```
+
+### Data tras (rezervace.php)
+
+Data, průvodci, lokace a časy pro kalendářní pozvánku se nastavují v poli `$walksData`:
+
+```php
+'kras' => [
+    'name'     => 'Okruh Srbsko, Chlum',
+    'date_txt' => '18. 4. 2026',
+    'start'    => '20260418T100000',   // Pro .ics soubor
+    'end'      => '20260418T140000',
+    'location' => 'Srbsko, Česká republika',
+    'guide'    => 'Martin Majer, Jan Holeček',
+    'img'      => 'https://...'        // Obrázek pro e-mail
+]
 ```
 
 ## 💳 Platební Systém
@@ -120,12 +142,13 @@ Aplikace generuje QR kódy ve formátu **SPAYD** (iniciativa ČNB pro standardiz
 ### Pro uživatele
 - Potvrzení rezervace
 - Platební údaje (QR kód + IBAN)
-- Datum a čas vycházky
+- Datum, čas a jméno průvodce
+- **Příloha `.ics`** – kalendářní pozvánka pro Google Calendar, Apple Calendar, Outlook
 
 ### Pro správce
 - Nová objednávka
 - Kontakt na uživatele
-- Informace o platbě
+- Informace o trase a platbě
 
 ## 🔄 Integrace s Google Sheets
 
@@ -138,12 +161,12 @@ Všechny rezervace se automaticky přidávají do Google Sheets tabulky:
 Struktura dat:
 ```json
 {
-  "date": "2026-02-14 09:18:35",
-  "walk": "Svatojanský okruh",
+  "date": "2026-04-18 10:00:00",
+  "walk": "Okruh Srbsko, Chlum",
   "email": "user@example.com",
   "count": 3,
-  "price": 300,
-  "qr_link": "https://..."
+  "price": 0,
+  "qr_link": ""
 }
 ```
 
@@ -178,18 +201,19 @@ Projekt je napsán bez velkých frameworků pro snadnou údržbu a minimální z
 ```
 Uživatel vyplní formulář
       ↓
-JavaScript je ověří
+JavaScript ověří a odešle
       ↓
 POST request na rezervace.php
       ↓
 PHP zpracuje data
-      ├→ Generuje QR kód
+      ├→ Generuje QR kód (SPAYD)
+      ├→ Sestaví .ics soubor (iCal)
       ├→ Posílá do Google Sheets
-      ├→ Odesílá e-mail uživateli
-      ├→ Odesílá e-mail správci
+      ├→ Odesílá e-mail uživateli (HTML + .ics příloha)
+      ├→ Odesílá e-mail správci (HTML)
       └→ Vrací JSON odpověď
       ↓
-JavaScript zobrazí potvrzení
+JavaScript zobrazí potvrzení s animací
 ```
 
 ## 📝 Licence
@@ -200,8 +224,7 @@ MIT License - viz LICENSE soubor
 
 - **Web**: https://www.berounsko.net
 - **E-mail**: info@berounsko.net
-- **GitHub**: https://github.com/username/berounsko
 
 ---
 
-**Poslední aktualizace**: 14. února 2026
+**Poslední aktualizace**: 23. února 2026

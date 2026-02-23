@@ -6,42 +6,46 @@ Podrobná dokumentace pro vývojáře a správce aplikace.
 
 ### Frontend (index.php)
 
-Jedná se o HTML stranku s vloženými CSS styly a JavaScript kódem. Nepoužívá se zde žádný build process.
+Jedná se o HTML stránku s vloženými CSS styly a JavaScript kódem. Nepoužívá se zde žádný build process.
 
-**CSS Strukturu:**
+**CSS Struktura:**
 - CSS proměnné (--c-blue, --c-green, --c-orange, --c-red) pro konzistentní barvy
 - CSS Grid pro responzivní layout
-- Flexbox pro modální okno
-- CSS animace (fadeIn) pro přechody
+- Flexbox pro modální okno a fixed-footer
+- CSS animace: `fadeIn`, `slideInUp`, `popIn` pro přechody a puntíky náročnosti
+- CSS transitions pro modal overlay, okno, obrázek trasy a rozbalování detailů
 
 **JavaScript:**
 - Vanilla JS bez závislostí (jQuery není potřeba)
 - Datová struktura `walks` obsahující všechny informace o trasách
-- Event listenery na tlačítka a formulář
 - Fetch API pro komunikaci s backendem
+- Funkce: `openModal()`, `closeAndReset()`, `changeWalk()`, `toggleDetails()`, `calculatePrice()`, `submitForm()`
 
 **Objem kódu:**
-- index.php: ~382 řádků (CSS + HTML + JS)
-- ~60KB přenosové velikosti
+- index.php: ~560 řádků (CSS + HTML + JS)
 
 ### Backend (rezervace.php)
 
 PHP skript, který:
 1. Přijímá POST data z formuláře
 2. Zpracovává rezervaci
-3. Generuje QR kód
-4. Odesílá e-maily
-5. Synchronizuje s Google Sheets
-6. Vrací JSON odpověď
+3. Generuje QR kód (SPAYD)
+4. Sestaví `.ics` soubor pro kalendářní pozvánku
+5. Odesílá multipart e-mail klientovi (HTML + .ics příloha)
+6. Odesílá e-mail správci (HTML)
+7. Synchronizuje s Google Sheets
+8. Vrací JSON odpověď
 
 **Tok zpracování:**
 ```
 POST data
   ├─ Validace (email, počet osob)
+  ├─ Načtení dat trasy z $walksData
   ├─ Výpočet ceny
-  ├─ Generace QR kódu
+  ├─ Generace QR kódu (SPAYD)
+  ├─ Sestavení .ics souboru (iCal)
   ├─ cURL POST do Google Sheets
-  ├─ Mail pro klienta (HTML)
+  ├─ Multipart mail pro klienta (HTML + .ics příloha)
   ├─ Mail pro admina (HTML)
   └─ JSON response
 ```
@@ -69,7 +73,7 @@ POST data
 
 ### index.php
 
-#### CSS Sekce (řádky 1-160)
+#### CSS Sekce
 
 **Barvové schéma:**
 ```css
@@ -83,73 +87,82 @@ POST data
 **Modální okno (.modal-window):**
 - Flexbox layout pro desktop (vlevo obrázek, vpravo formulář)
 - Na mobilu se změní na column (stack)
-- Maximální výška 90vh s overflow-y
+- Animované otevření/zavření přes CSS třídy `is-visible`
+- `backdrop-filter: blur(5px)` pro efekt rozmazaného pozadí
 
 **Komponenty:**
-- `.walk-btn` - Tlaítka pro výběr tras
+- `.scroll-content` - Scrollovatelná oblast formuláře (flex: 1)
+- `.fixed-footer` - Vždy viditelná patička s cenou a tlačítkem
+- `.walk-btn` - Tlačítka pro výběr tras
 - `.info-row` - Řádek s informacemi (průvodce, datum, délka, náročnost)
-- `.difficulty-wrapper` - Indikátor náročnosti (puntíky)
+- `.difficulty-wrapper` - Indikátor náročnosti (puntíky s animací `popIn`)
+- `.hidden-content-wrapper` - Rozbalitelný obsah (CSS max-height transition)
 - `.form-group` - Skupiny formuláře
 
-#### JavaScript Sekce (řádky 160-382)
+#### JavaScript Sekce
 
 **Datová struktura `walks`:**
 ```javascript
 {
   'kras': {
     title: string,           // Název pro zobrazení
-    img: string,             // URL obrázku
+    img: string,             // Cesta k obrázku (z img/ složky)
     guide: string,           // Jméno průvodce
     date: string,            // Datum vycházky
     distance: string,        // Délka trasy
     difficulty: number(1-5), // Náročnost
     pricePerPerson: number,  // Cena v Kč
-    desc: string[]           // Pole opisů (bullet points)
+    desc: string[]           // Pole opisů (první vždy viditelný, zbytek rozbalitelný)
   }
 }
 ```
 
 **Klíčové funkce:**
 
-| Funkce | Parametry | Výstup |
-|--------|-----------|--------|
-| `changeWalk(id)` | id: string | Aktualizuje UI pro vybranou trasu |
-| `calculatePrice()` | - | Spočítá a zobrazí cenu |
-| `submitForm(e)` | e: Event | Odešle POST na `rezervace.php` |
-| `closeAndReset()` | - | Zavře modální okno a resetuje formulář |
+| Funkce | Parametry | Popis |
+|--------|-----------|-------|
+| `openModal()` | - | Zobrazí modal s CSS animací |
+| `closeAndReset()` | - | Zavře modal s animací a resetuje stav |
+| `changeWalk(id)` | id: string | Aktualizuje UI, obrázek (fade), puntíky, popis |
+| `toggleDetails()` | - | Rozbalí/sbalí skryté body popisu |
+| `calculatePrice()` | - | Spočítá a zobrazí cenu v patičce |
+| `submitForm(e)` | e: Event | Odešle POST na `rezervace.php`, zobrazí success view |
 
 **Vykreslování puntíků náročnosti:**
 ```javascript
-// Barvy podle stupně
+// Barvy podle stupně, puntíky se animují postupně (stagger 50ms)
 difficulty 1-2: .active-green
 difficulty 3-4: .active-orange
 difficulty 5:   .active-red
 ```
 
-#### HTML Sekce (řádky 160-250)
+#### HTML Sekce
 
 **Struktura modálního okna:**
 ```
-modal-overlay (backdrop)
+modal-overlay (backdrop, is-visible pro animaci)
   └─ modal-window
-      ├─ modal-left (obrázek)
-      └─ modal-right (obsah)
-          ├─ walk-selector (tlačítka tras)
-          ├─ annotation-box (popis)
-          ├─ info-row (info box)
-          ├─ reservationForm
-          └─ successView (potvrzení)
+      ├─ modal-left (obrázek trasy, fade transition)
+      └─ modal-right
+          └─ mainFormView (view-wrapper)
+              ├─ scroll-content
+              │   ├─ walk-selector (tlačítka tras)
+              │   ├─ annotation-box (popis + toggle)
+              │   ├─ info-row (průvodce, datum, délka, náročnost)
+              │   └─ reservationForm
+              └─ fixed-footer (cena + submit tlačítko)
+          └─ successView (potvrzení s animací)
 ```
 
 **Formulář:**
 - Hidden pole: `walk_id`, `walk_name`
 - E-mail input (povinný)
 - Select pro počet osob (1-20)
-- Submit tlačítko s dynamickým textem
+- Submit tlačítko mimo `<form>` s atributem `form="reservationForm"` (umožňuje umístění mimo form tag)
 
 ### rezervace.php
 
-#### Konfigurační Sekce (řádky 1-10)
+#### Konfigurační Sekce
 
 ```php
 $adminEmail = "..."         // Kde dorazí notifikace
@@ -157,36 +170,57 @@ $rawIban = "..."            // IBAN pro QR platby
 $googleScriptUrl = "..."    // URL skriptu pro Sheets
 ```
 
+#### Data tras ($walksData)
+
+Centrální pole s daty pro všechny vycházky. Slouží jako zdroj pravdy pro e-maily a kalendářní pozvánku:
+
+```php
+$walksData = [
+    'kras' => [
+        'name'     => 'Okruh Srbsko, Chlum',
+        'date_txt' => '18. 4. 2026',         // Text do e-mailu
+        'start'    => '20260418T100000',      // Začátek pro .ics (YYYYMMDDThhmmss)
+        'end'      => '20260418T140000',      // Konec pro .ics
+        'location' => 'Srbsko, Česká republika',
+        'guide'    => 'Martin Majer, Jan Holeček',
+        'img'      => 'https://...'           // Obrázek v HTML e-mailu
+    ],
+    // ... další trasy
+]
+```
+
 #### Funkční Sekce
 
-**1. Validace vstupů (řádky 20-25)**
+**1. Validace vstupů**
 ```php
-// Kontrola povinných polí
 if (!$email || !$count)
     return error response
 ```
 
-**2. Generace QR kódu (řádky 35-43)**
+**2. Generace QR kódu**
 - Formát: SPAYD (SPD*1.0*)
 - API: qrserver.com
-- Vrací obrázek v HTML tagu
+- Vrací HTML img tag s QR kódem
 
-**3. Odesílání do Google Sheets (řádky 47-60)**
+**3. Sestavení .ics souboru (iCal)**
+- Formát: RFC 5545 (VCALENDAR/VEVENT)
+- Obsahuje: název, čas, lokaci, jméno průvodce
+- Odeslán jako Base64 příloha e-mailu
+
+**4. Odesílání do Google Sheets**
 - cURL POST request
-- Timeout: 10 sekund
-- Asynchronní (nečeká na odpověď)
+- Timeout: 5 sekund
 
-**4. E-mail klientovi (řádky 64-130)**
-- Téma: Potvrzení rezervace
-- Obsah: HTML s obrázkem, detaily, QR kódem
-- Vrátkou: HTML email
+**5. Multipart e-mail klientovi**
+- `Content-Type: multipart/mixed`
+- Část 1: HTML e-mail s obrázkem, detaily, QR kódem, jménem průvodce a datem
+- Část 2: Base64 příloha `pozvanka.ics`
 
-**5. E-mail správci (řádky 135-155)**
-- Téma: [Nová objednávka] Jméno vycházky
-- Obsah: Technické detaily
-- Odpověď na: E-mail uživatele
+**6. E-mail správci**
+- Jednoduché HTML s detaily rezervace
+- `Reply-To` nastaven na e-mail klienta
 
-**6. JSON Odpověď (řádky 160-165)**
+**7. JSON Odpověď**
 ```php
 {
   "success": bool,
@@ -395,9 +429,9 @@ chmod 644 index.php rezervace.php
 - [ ] Uživatelské konta
 - [ ] Více jazyků (en, de)
 - [ ] SMS notifikace
-- [ ] Integraci s kalendářem
+- [x] Integrace s kalendářem (.ics příloha v e-mailu)
 
 ---
 
-**Verze:** 1.0  
-**Poslední úprava:** 14. února 2026
+**Verze:** 1.1
+**Poslední úprava:** 23. února 2026
