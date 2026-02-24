@@ -1,0 +1,13 @@
+<?php
+// Zkopírujte tento soubor jako smtp.local.php a nastavte přihlašovací údaje.
+// Soubor smtp.local.php je v .gitignore – nikdy nebude commitnut do repozitáře.
+
+// SMTP údaje najdete v administraci vašeho webhostingu.
+
+define('SMTP_HOST',       'smtp.vas-hosting.cz');   // např. smtp.gmail.com
+define('SMTP_USER',       'vas-email@domena.cz');
+define('SMTP_PASS',       'vase-heslo');
+define('SMTP_PORT',       587);
+define('SMTP_SECURE',     'tls');                    // 'tls' (port 587) nebo 'ssl' (port 465)
+define('SMTP_FROM_EMAIL', 'vas-email@domena.cz');
+define('SMTP_FROM_NAME',  'Název webu');
