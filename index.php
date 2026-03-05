@@ -89,7 +89,7 @@ $countdownIso = $countdownTarget ? date('Y-m-d\TH:i:s', $countdownTarget) : '';
         /* --- 1. HERO SEKCE (šikmý přechod 2026) --- */
         .hero-section {
             min-height: 85vh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;
-            clip-path: polygon(0 0, 100% 0, 100% 92%, 0 100%);
+            clip-path: polygon(0 0, 100% 0, 100% 97%, 0 100%);
             padding-bottom: 8vh;
         }
         .hero-bg { position: absolute; inset: 0; z-index: 0; }
@@ -359,12 +359,12 @@ $countdownIso = $countdownTarget ? date('Y-m-d\TH:i:s', $countdownTarget) : '';
         /* --- 11. LANDING SECTIONS (větší, výraznější, překryvy) --- */
         .section { padding: 88px 28px; max-width: 1000px; margin: 0 auto; position: relative; }
         /* První sekce pod hero – překrývá šikmý okraj, velký radius, ikona */
-        #benefity { margin-top: -5vw; padding-top: calc(88px + 5vw); z-index: 2; background: #fff; box-shadow: 0 -10px 40px rgba(0,0,0,0.06); border-radius: 20px; overflow: hidden; }
+        #benefity { margin-top: -5vw; padding-top: calc(32px + 2vw); z-index: 2; background: #fff; box-shadow: 0 -10px 40px rgba(0,0,0,0.06); border-radius: 20px; overflow: hidden; }
         #benefity .benefits-inner { padding: 0; }
-        .benefits-head { text-align: center; margin-bottom: 28px; }
-        .benefits-section-icon { display: inline-flex; align-items: center; justify-content: center; width: 72px; height: 72px; margin-bottom: 16px; background: linear-gradient(135deg, rgba(104,172,249,0.2) 0%, rgba(25,46,124,0.12) 100%); border-radius: 20px; color: var(--c-dark); }
-        .benefits-section-icon svg { width: 40px; height: 40px; }
-        #benefity .section-title { margin-bottom: 16px; }
+        .benefits-head { text-align: center; margin-bottom: 24px; display: flex; flex-direction: column; align-items: center; width: 100%; padding: 0; }
+        .benefits-section-icon { display: flex; align-items: center; justify-content: center; width: 120px; height: 120px; margin-bottom: 12px; background: linear-gradient(135deg, rgba(104,172,249,0.2) 0%, rgba(25,46,124,0.12) 100%); border-radius: 28px; color: var(--c-dark); }
+        .benefits-section-icon svg { width: 64px; height: 64px; }
+        #benefity .section-title { margin-bottom: 12px; margin-top: 0; }
         #benefity > p { padding: 0 28px; }
         /* Druhá šikmá hrana – sekce „Proč Berounsko“ má šikmý horní okraj */
         #why { position: relative; overflow: hidden; }
@@ -424,10 +424,9 @@ $countdownIso = $countdownTarget ? date('Y-m-d\TH:i:s', $countdownTarget) : '';
         .site-footer {
             background: var(--c-dark);
             color: rgba(255,255,255,0.85);
-            margin-top: 0;
-            padding: 120px 28px 48px;
+            margin-top: 80px;
+            padding: 48px 28px 32px;
             position: relative;
-            clip-path: polygon(0 8vw, 100% 0, 100% 100%, 0 100%);
         }
         .footer-inner { max-width: 1000px; margin: 0 auto; position: relative; z-index: 1; }
         .footer-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 32px; padding-bottom: 28px; border-bottom: 1px solid rgba(255,255,255,0.2); }
@@ -462,9 +461,9 @@ $countdownIso = $countdownTarget ? date('Y-m-d\TH:i:s', $countdownTarget) : '';
             .nav-links .hero-btn { width: 100%; text-align: center; }
             .nav-toggle { display: block; }
 
-            .hero-section { min-height: 75vh; padding-top: 70px; padding-bottom: 48px; clip-path: polygon(0 0, 100% 0, 100% 96%, 0 100%); }
-            #benefity { margin-top: -8vw; padding-top: calc(88px + 8vw); }
-            .site-footer { clip-path: polygon(0 12vw, 100% 0, 100% 100%, 0 100%); padding-top: 120px; }
+            .hero-section { min-height: 75vh; padding-top: 70px; padding-bottom: 48px; clip-path: polygon(0 0, 100% 0, 100% 98%, 0 100%); }
+            #benefity { margin-top: -8vw; padding-top: calc(28px + 4vw); }
+            .site-footer { padding: 32px 18px 24px; }
             .footer-logo img { height: 40px; }
             .hero-content { padding-bottom: 32px; }
             .hero-countdown-grid { width: 100%; }
@@ -479,7 +478,7 @@ $countdownIso = $countdownTarget ? date('Y-m-d\TH:i:s', $countdownTarget) : '';
             .modal-left { height: 150px; flex: none; }
             .scroll-content { padding: 20px; }
             .fixed-footer { padding: 15px 20px; }
-            .site-footer { padding: 120px 18px 24px; }
+            .site-footer { padding: 32px 18px 24px; }
             .footer-top { flex-direction: column; text-align: center; gap: 24px; }
             .footer-nav { justify-content: center; }
             .footer-logo img { height: 40px; }
