@@ -27,6 +27,22 @@ foreach (['kras' => 'kras', 'svatojan' => 'svatojan', 'krivoklat' => 'krivoklat'
     ];
 }
 function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
+
+// Nejbližší nadcházející vycházka (pro odpočet v hero)
+$now = time();
+$countdownTarget = null;
+$countdownWalkTitle = '';
+foreach ($walksItems as $w) {
+    $s = $w['start'] ?? '';
+    if (preg_match('/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})$/', $s, $m)) {
+        $ts = mktime((int)$m[4], (int)$m[5], (int)$m[6], (int)$m[2], (int)$m[3], (int)$m[1]);
+        if ($ts > $now && ($countdownTarget === null || $ts < $countdownTarget)) {
+            $countdownTarget = $ts;
+            $countdownWalkTitle = $w['title'] ?? '';
+        }
+    }
+}
+$countdownIso = $countdownTarget ? date('Y-m-d\TH:i:s', $countdownTarget) : '';
 ?>
 <!DOCTYPE html>
 <html lang="cs">
@@ -72,24 +88,35 @@ function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
         
         /* --- 1. HERO SEKCE --- */
         .hero-section {
-            background-image: url('https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1600&q=80');
-            background-size: cover; background-position: center;
-            min-height: 85vh; display: flex; align-items: center; justify-content: center; position: relative;
+            min-height: 85vh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;
         }
-        .hero-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(25,46,124,0.45); }
-        .hero-content { position: relative; z-index: 1; text-align: center; color: white; animation: slideInUp 0.8s ease-out; padding: 0 20px; }
+        .hero-bg { position: absolute; inset: 0; z-index: 0; }
+        .hero-bg-slide {
+            position: absolute; inset: 0; background-size: cover; background-position: center;
+            opacity: 0; transition: opacity 1.8s ease-in-out;
+        }
+        .hero-bg-slide.active { opacity: 1; z-index: 1; }
+        .hero-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(25,46,124,0.45); z-index: 2; }
+        .hero-content { position: relative; z-index: 3; text-align: center; color: white; animation: slideInUp 0.8s ease-out; padding: 0 20px; }
         .hero-title { font-size: clamp(2.2rem, 5vw, 4rem); font-weight: 700; margin-bottom: 24px; text-shadow: 0 2px 20px rgba(0,0,0,0.5); line-height: 1.15; }
-        .hero-subtitle { font-size: clamp(1.15rem, 2.2vw, 1.5rem); margin-bottom: 36px; max-width: 560px; margin-left: auto; margin-right: auto; opacity: 0.95; line-height: 1.5; }
+        .hero-subtitle { font-size: clamp(1.15rem, 2.2vw, 1.5rem); margin-bottom: 24px; max-width: 560px; margin-left: auto; margin-right: auto; opacity: 0.95; line-height: 1.5; }
+        .hero-countdown { margin-bottom: 32px; }
+        .hero-countdown-label { font-size: 0.95em; opacity: 0.9; margin-bottom: 12px; }
+        .hero-countdown-grid { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px 20px; }
+        .hero-countdown-item { background: rgba(255,255,255,0.15); backdrop-filter: blur(4px); border-radius: 10px; padding: 14px 20px; min-width: 72px; text-align: center; border: 1px solid rgba(255,255,255,0.25); }
+        .hero-countdown-item span { display: block; font-size: 1.8em; font-weight: 700; line-height: 1.2; }
+        .hero-countdown-item small { font-size: 0.7em; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px; }
+        .hero-countdown-done { font-size: 1.1em; font-weight: 600; padding: 12px 24px; background: rgba(146,190,68,0.9); border-radius: 8px; }
 
         /* Hlavní CTA – zelená jako „Další místa“ na referenčním webu */
         .hero-btn {
             padding: 18px 44px; font-size: 1.15em; background-color: var(--c-green);
-            color: white; border: none; border-radius: 50px; cursor: pointer; font-weight: 600;
+            color: #111; border: none; border-radius: 50px; cursor: pointer; font-weight: 600;
             box-shadow: 0 4px 16px rgba(146,190,68,0.35);
             transition: transform 0.3s, background-color 0.2s;
             text-transform: uppercase; letter-spacing: 1px;
         }
-        .hero-btn:hover { transform: scale(1.05) translateY(-3px); background-color: #7cc936; }
+        .hero-btn:hover { transform: scale(1.05) translateY(-3px); background-color: #7cc936; color: #111; }
 
         /* --- 2. BAREVNÁ PALETA BEROUNSKO --- */
         :root {
@@ -172,21 +199,27 @@ function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
         }
 
         .close-modal {
-            position: absolute; right: 20px; top: 15px; font-size: 28px; cursor: pointer; color: #aaa; z-index: 50;
-            background: rgba(255,255,255,0.8); border-radius: 50%; width: 40px; height: 40px; text-align: center; line-height: 40px;
+            position: absolute; right: 20px; top: 15px; cursor: pointer; z-index: 50;
+            background: rgba(255,255,255,0.95); border-radius: 50%; width: 44px; height: 44px;
+            display: flex; align-items: center; justify-content: center;
+            border: none; padding: 0; transition: transform 0.25s ease, background 0.2s;
         }
-        .close-modal:hover { color: var(--c-red); background: #fff; }
+        .close-modal { color: #333; }
+        .close-modal svg { width: 22px; height: 22px; transition: color 0.2s; }
+        .close-modal:hover { background: #fff; color: var(--c-dark); transform: rotate(90deg); }
 
         h2 { font-weight: 600; margin-bottom: 20px; color: var(--c-dark); margin-top: 0; }
         
         /* --- 4. PŘEPÍNAČE --- */
         .walk-selector { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
         .walk-btn {
-            padding: 8px 15px; border: 2px solid #ddd; border-radius: 20px;
-            cursor: pointer; font-size: 0.9em; background: #fff; transition: all 0.3s;
+            padding: 10px 18px; border: 2px solid #ddd; border-radius: 50px;
+            cursor: pointer; font-size: 0.9em; background: #fff; color: #333; font-weight: 500;
+            transition: all 0.25s ease;
         }
+        .walk-btn:hover { border-color: var(--c-accent); color: var(--c-dark); }
         .walk-btn.active {
-            border-color: var(--c-orange); background: var(--c-orange); color: #fff; font-weight: 600; transform: scale(1.05);
+            border-color: var(--c-orange); background: var(--c-orange); color: #111; font-weight: 600; transform: scale(1.02);
         }
 
         /* --- 5. ROZBALOVÁNÍ TEXTU --- */
@@ -237,12 +270,14 @@ function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
             font-size: 1.4em; font-weight: 600; color: var(--c-green); text-align: center; margin-bottom: 15px;
         }
         .btn-submit {
-            background: var(--c-green); color: white; border: none; padding: 15px;
-            width: 100%; font-size: 1.1em; font-weight: 600; border-radius: 6px; cursor: pointer;
-            transition: background 0.3s;
+            background: var(--c-green); color: #111; border: none; padding: 14px 24px;
+            width: 100%; font-size: 1.1em; font-weight: 600; border-radius: 50px; cursor: pointer;
+            transition: background 0.25s, color 0.2s;
         }
-        .btn-submit:hover { background: #7cc936; }
-        .btn-submit:disabled { background: #ccc; cursor: not-allowed; }
+        .btn-submit:hover { background: #7cc936; color: #111; }
+        .btn-submit:disabled { background: #ccc; color: #555; cursor: not-allowed; }
+        .btn-submit.btn-secondary { background: #444; color: #fff; }
+        .btn-submit.btn-secondary:hover { background: #333; color: #fff; }
 
         /* --- 9. SUCCESS STAV --- */
         .success-message {
@@ -272,17 +307,37 @@ function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
         /* --- 10. LANDING PAGE: HEADER (paleta Berounsko) --- */
         .site-header {
             position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            width: 100%;
+            margin: 0;
             background: var(--c-dark);
             box-shadow: 0 2px 20px rgba(0,0,0,0.2);
-            padding: 14px 28px; display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 28px; display: flex; align-items: center; justify-content: space-between; gap: 32px;
+            border-radius: 0;
+            transition: top 0.4s cubic-bezier(0.4, 0, 0.2, 1), left 0.4s cubic-bezier(0.4, 0, 0.2, 1), width 0.4s cubic-bezier(0.4, 0, 0.2, 1), margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s cubic-bezier(0.4, 0, 0.2, 1), border-radius 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .logo { font-size: 1.35em; font-weight: 700; color: #fff; text-decoration: none; letter-spacing: -0.5px; }
-        .logo:hover { color: #e0e0e0; }
-        .logo img { height: 42px; display: block; }
-        .nav-links { display: flex; align-items: center; gap: 28px; }
+        .site-header.is-scrolled {
+            top: 24px;
+            left: 50%;
+            right: auto;
+            width: 1040px;
+            max-width: calc(100vw - 48px);
+            margin-left: -520px; /* polovina 1040px pro centrování */
+            margin-right: 0;
+            border-radius: 9999px;
+            padding: 10px 28px;
+            box-shadow: 0 4px 28px rgba(0,0,0,0.3);
+            background-color: var(--c-dark);
+        }
+        .logo { font-size: 1.35em; font-weight: 700; color: #fff; text-decoration: none; letter-spacing: -0.5px; display: block; }
+        .logo:hover { opacity: 0.9; }
+        .logo img { height: 42px; width: auto; display: block; transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .site-header.is-scrolled .logo img { height: 36px; }
+        .nav-links { display: flex; align-items: center; gap: 22px; flex-shrink: 0; }
         .nav-links a { color: rgba(255,255,255,0.9); text-decoration: none; font-weight: 600; font-size: 0.95em; }
         .nav-links a:hover { color: #fff; }
-        .nav-links .hero-btn { background: var(--c-green); padding: 10px 22px; font-size: 0.9em; }
+        .nav-links .hero-btn { background-color: var(--c-green); background-image: none; color: #111; padding: 10px 22px; font-size: 0.9em; }
+        .site-header .nav-links .hero-btn:hover { background-color: #7cc936; color: #111; }
+        .site-header.is-scrolled .nav-links .hero-btn { background-color: var(--c-green); background-image: none; color: #111; }
 
         .nav-toggle {
             display: none;
@@ -346,7 +401,22 @@ function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
         .contact-box a { color: var(--c-accent); font-weight: 600; text-decoration: none; font-size: 1.1em; }
         .contact-box a:hover { text-decoration: underline; }
 
-        .site-footer { background: var(--c-dark); color: rgba(255,255,255,0.75); text-align: center; padding: 28px 24px; font-size: 0.95em; margin-top: 80px; }
+        /* Plynulé scrollování při kliknutí na kotvy */
+        html { scroll-behavior: smooth; }
+        .site-footer {
+            background: var(--c-dark);
+            color: rgba(255,255,255,0.85);
+            margin-top: 80px;
+            padding: 48px 28px 32px;
+        }
+        .footer-inner { max-width: 1000px; margin: 0 auto; }
+        .footer-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 32px; padding-bottom: 28px; border-bottom: 1px solid rgba(255,255,255,0.2); }
+        .footer-logo { display: block; }
+        .footer-logo img { height: 48px; width: auto; display: block; }
+        .footer-nav { display: flex; flex-wrap: wrap; gap: 8px 24px; }
+        .footer-nav a { color: rgba(255,255,255,0.9); text-decoration: none; font-weight: 600; font-size: 0.95em; }
+        .footer-nav a:hover { color: #fff; text-decoration: underline; }
+        .footer-bottom { padding-top: 24px; text-align: center; font-size: 0.9em; color: rgba(255,255,255,0.7); }
 
         /* --- 12. RESPONZIVITA --- */
         @media (max-width: 900px) {
@@ -354,6 +424,7 @@ function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
         }
         @media (max-width: 768px) {
             .site-header { padding: 10px 16px; }
+            .site-header.is-scrolled { left: 0; right: 0; width: 340px; max-width: calc(100vw - 24px); margin-left: auto; margin-right: auto; top: 20px; padding: 10px 16px; background-color: var(--c-dark); }
             .nav-links {
                 position: absolute;
                 top: 100%;
@@ -371,7 +442,10 @@ function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
             .nav-links .hero-btn { width: 100%; text-align: center; }
             .nav-toggle { display: block; }
 
-            .hero-section { min-height: 75vh; padding-top: 70px; }
+            .hero-section { min-height: 75vh; padding-top: 70px; padding-bottom: 48px; }
+            .hero-content { padding-bottom: 32px; }
+            .hero-countdown-grid { width: 100%; }
+            .hero-countdown-item { flex: 1; min-width: 0; }
             .nav-links { gap: 14px; font-size: 0.9em; }
             .section { padding: 56px 18px; }
             .benefits-grid { grid-template-columns: 1fr; gap: 20px; }
@@ -382,6 +456,10 @@ function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
             .modal-left { height: 150px; flex: none; }
             .scroll-content { padding: 20px; }
             .fixed-footer { padding: 15px 20px; }
+            .site-footer { padding: 32px 18px 24px; }
+            .footer-top { flex-direction: column; text-align: center; gap: 24px; }
+            .footer-nav { justify-content: center; }
+            .footer-logo img { height: 40px; }
         }
     </style>
 </head>
@@ -389,10 +467,13 @@ function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
 
     <header class="site-header">
         <a href="#uvod" class="logo" aria-label="Berounsko.net – úvod">
-            <!-- Logo: nahraďte src cestou k obrázku, např. img/logo.png -->
-            <span>Berounsko.net</span>
+            <img src="img/logo_berounsko_white.svg" alt="Berounsko.net">
         </a>
         <nav class="nav-links" id="mainNav">
+            <a href="#uvod">Úvod</a>
+            <a href="#benefity">Benefity</a>
+            <a href="#why">Proč Berounsko</a>
+            <a href="#průvodci">Průvodci</a>
             <a href="#vychazky">Vycházky</a>
             <a href="#faq">FAQ</a>
             <a href="#kontakt">Kontakt</a>
@@ -406,10 +487,27 @@ function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
     </header>
 
     <section class="hero-section" id="uvod">
+        <div class="hero-bg" id="heroBg">
+            <div class="hero-bg-slide active" style="background-image: url('img/cover1.jpg');"></div>
+            <div class="hero-bg-slide" style="background-image: url('img/cover2.jpg');"></div>
+            <div class="hero-bg-slide" style="background-image: url('img/cover3.jpg');"></div>
+        </div>
         <div class="hero-overlay"></div>
-        <div class="hero-content">
+        <div class="hero-content" id="heroContent" data-countdown="<?= h($countdownIso) ?>">
             <h1 class="hero-title"><?= h($hero['title']) ?></h1>
             <p class="hero-subtitle"><?= h($hero['subtitle']) ?></p>
+            <?php if ($countdownIso !== ''): ?>
+            <div class="hero-countdown" id="heroCountdown">
+                <p class="hero-countdown-label"><?= $countdownWalkTitle !== '' ? 'Do vycházky „' . h($countdownWalkTitle) . '“ zbývá' : 'Do první komentované vycházky zbývá' ?></p>
+                <div class="hero-countdown-grid">
+                    <div class="hero-countdown-item"><span id="cd-days">0</span><small>dní</small></div>
+                    <div class="hero-countdown-item"><span id="cd-hours">0</span><small>hodin</small></div>
+                    <div class="hero-countdown-item"><span id="cd-mins">0</span><small>minut</small></div>
+                    <div class="hero-countdown-item"><span id="cd-secs">0</span><small>sekund</small></div>
+                </div>
+            </div>
+            <div class="hero-countdown-done" id="heroCountdownDone" style="display: none;">První vycházka právě začíná! Rezervujte si místo.</div>
+            <?php endif; ?>
             <button class="hero-btn" onclick="openModal()">Rezervovat vycházku</button>
         </div>
     </section>
@@ -435,7 +533,7 @@ function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
         </div>
     </section>
 
-    <section class="section" style="background: #f8f9fa;">
+    <section class="section" id="why" style="background: #f8f9fa;">
         <h2 class="section-title"><?= h($why['title']) ?></h2>
         <?php foreach ($why['paragraphs'] ?? [] as $p): ?><p><?= h($p) ?></p><?php endforeach; ?>
     </section>
@@ -472,12 +570,34 @@ function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
     </section>
 
     <footer class="site-footer">
-        <?= h($footer['text']) ?>
+        <div class="footer-inner">
+            <div class="footer-top">
+                <a href="#uvod" class="footer-logo" aria-label="Berounsko.net – úvod">
+                    <img src="img/logo_berounsko_white.svg" alt="Berounsko.net">
+                </a>
+                <nav class="footer-nav" aria-label="Odkazy na sekce">
+                    <a href="#uvod">Úvod</a>
+                    <a href="#benefity">Benefity</a>
+                    <a href="#why">Proč Berounsko</a>
+                    <a href="#průvodci">Průvodci</a>
+                    <a href="#vychazky">Vycházky</a>
+                    <a href="#faq">FAQ</a>
+                    <a href="#kontakt">Kontakt</a>
+                </nav>
+            </div>
+            <div class="footer-bottom">
+                <?= h($footer['text']) ?>
+            </div>
+        </div>
     </footer>
 
-    <div id="bookingModal" class="modal-overlay">
+    <div id="bookingModal" class="modal-overlay" onclick="if(event.target===this) closeAndReset()">
         <div class="modal-window">
-            <span class="close-modal" onclick="closeAndReset()">&times;</span>
+            <button type="button" class="close-modal" onclick="closeAndReset()" aria-label="Zavřít">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
             
             <div class="modal-left" id="modalImage" style="background-image: url('img/cesky-kras.jpg');"></div>
 
@@ -546,7 +666,7 @@ function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
                         <h3>Odesláno!</h3>
                         <p>Rezervace byla úspěšně vytvořena.</p>
                         <p>Potvrzení a platební údaje dorazí na Váš e-mail.</p>
-                        <button onclick="closeAndReset()" class="btn-submit" style="margin-top: 30px; background: #555;">Zavřít okno</button>
+                        <button type="button" onclick="closeAndReset()" class="btn-submit btn-secondary" style="margin-top: 30px;">Zavřít okno</button>
                     </div>
                 </div>
 
@@ -755,9 +875,74 @@ function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
         nav.classList.toggle('is-open');
     }
 
+    // Rotace hero pozadí (cover1–3)
+    function startHeroSlideshow() {
+        const container = document.getElementById('heroBg');
+        if (!container) return;
+        const slides = container.querySelectorAll('.hero-bg-slide');
+        if (slides.length === 0) return;
+        let idx = 0;
+        setInterval(function() {
+            slides[idx].classList.remove('active');
+            idx = (idx + 1) % slides.length;
+            slides[idx].classList.add('active');
+        }, 5500);
+    }
+
+    // Odpočet do první vycházky
+    function startCountdown() {
+        const el = document.getElementById('heroContent');
+        const targetStr = el && el.getAttribute('data-countdown');
+        if (!targetStr) return;
+        const target = new Date(targetStr.replace(' ', 'T'));
+        const block = document.getElementById('heroCountdown');
+        const done = document.getElementById('heroCountdownDone');
+        const pad = (n) => String(Math.max(0, Math.floor(n))).padStart(2, '0');
+
+        function tick() {
+            const now = new Date();
+            const diff = target - now;
+            if (diff <= 0) {
+                if (block) block.style.display = 'none';
+                if (done) done.style.display = 'block';
+                return;
+            }
+            const d = diff / (24*60*60*1000);
+            const h = (d % 1) * 24;
+            const m = (h % 1) * 60;
+            const s = (m % 1) * 60;
+            const daysEl = document.getElementById('cd-days');
+            const hoursEl = document.getElementById('cd-hours');
+            const minsEl = document.getElementById('cd-mins');
+            const secsEl = document.getElementById('cd-secs');
+            if (daysEl) daysEl.textContent = Math.floor(d);
+            if (hoursEl) hoursEl.textContent = pad(h);
+            if (minsEl) minsEl.textContent = pad(m);
+            if (secsEl) secsEl.textContent = pad(s);
+        }
+        tick();
+        setInterval(tick, 1000);
+    }
+
+    // Navigace: při scrollu přechod do pill tvaru
+    function initHeaderScroll() {
+        var header = document.querySelector('.site-header');
+        if (!header) return;
+        var threshold = 80;
+        function update() {
+            if (window.scrollY > threshold) header.classList.add('is-scrolled');
+            else header.classList.remove('is-scrolled');
+        }
+        window.addEventListener('scroll', function() { requestAnimationFrame(update); }, { passive: true });
+        update();
+    }
+
     // Init
     changeWalk('kras');
     renderWalkCards();
+    startHeroSlideshow();
+    startCountdown();
+    initHeaderScroll();
     </script>
 </body>
 </html>
