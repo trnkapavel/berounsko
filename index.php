@@ -86,9 +86,11 @@ $countdownIso = $countdownTarget ? date('Y-m-d\TH:i:s', $countdownTarget) : '';
             100% { transform: scale(1); opacity: 1; } 
         }
         
-        /* --- 1. HERO SEKCE --- */
+        /* --- 1. HERO SEKCE (šikmý přechod 2026) --- */
         .hero-section {
             min-height: 85vh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;
+            clip-path: polygon(0 0, 100% 0, 100% 92%, 0 100%);
+            padding-bottom: 8vh;
         }
         .hero-bg { position: absolute; inset: 0; z-index: 0; }
         .hero-bg-slide {
@@ -354,14 +356,30 @@ $countdownIso = $countdownTarget ? date('Y-m-d\TH:i:s', $countdownTarget) : '';
             stroke-width: 2.4;
         }
 
-        /* --- 11. LANDING SECTIONS (větší, výraznější) --- */
-        .section { padding: 88px 28px; max-width: 1000px; margin: 0 auto; }
+        /* --- 11. LANDING SECTIONS (větší, výraznější, překryvy) --- */
+        .section { padding: 88px 28px; max-width: 1000px; margin: 0 auto; position: relative; }
+        /* První sekce pod hero – překrývá šikmý okraj, velký radius, ikona */
+        #benefity { margin-top: -5vw; padding-top: calc(88px + 5vw); z-index: 2; background: #fff; box-shadow: 0 -10px 40px rgba(0,0,0,0.06); border-radius: 20px; overflow: hidden; }
+        #benefity .benefits-inner { padding: 0; }
+        .benefits-head { text-align: center; margin-bottom: 28px; }
+        .benefits-section-icon { display: inline-flex; align-items: center; justify-content: center; width: 72px; height: 72px; margin-bottom: 16px; background: linear-gradient(135deg, rgba(104,172,249,0.2) 0%, rgba(25,46,124,0.12) 100%); border-radius: 20px; color: var(--c-dark); }
+        .benefits-section-icon svg { width: 40px; height: 40px; }
+        #benefity .section-title { margin-bottom: 16px; }
+        #benefity > p { padding: 0 28px; }
+        /* Druhá šikmá hrana – sekce „Proč Berounsko“ má šikmý horní okraj */
+        #why { position: relative; overflow: hidden; }
+        #why::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 8vw; background: #f8f9fa;
+            transform: skewY(-1.8deg); transform-origin: left center; z-index: -1;
+        }
+        .section.reveal-ready { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+        .section.reveal-ready.is-visible { opacity: 1; transform: translateY(0); }
         .section-title { font-size: clamp(1.75rem, 3vw, 2.25rem); font-weight: 700; color: var(--c-dark); margin-bottom: 32px; text-align: center; }
         .section > p { line-height: 1.75; color: #444; margin-bottom: 20px; font-size: 1.05em; }
         .section ul { padding-left: 22px; line-height: 1.8; color: #444; }
 
         /* Benefity – boxy s ikonami (4 v řadě na desktopu) */
-        .benefits-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 44px; }
+        .benefits-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 36px; }
         .benefit-card {
             background: #fff; padding: 32px 28px; border-radius: 16px;
             box-shadow: 0 6px 24px rgba(25,46,124,0.08); border: 1px solid rgba(25,46,124,0.12);
@@ -406,13 +424,15 @@ $countdownIso = $countdownTarget ? date('Y-m-d\TH:i:s', $countdownTarget) : '';
         .site-footer {
             background: var(--c-dark);
             color: rgba(255,255,255,0.85);
-            margin-top: 80px;
-            padding: 48px 28px 32px;
+            margin-top: 0;
+            padding: 120px 28px 48px;
+            position: relative;
+            clip-path: polygon(0 8vw, 100% 0, 100% 100%, 0 100%);
         }
-        .footer-inner { max-width: 1000px; margin: 0 auto; }
+        .footer-inner { max-width: 1000px; margin: 0 auto; position: relative; z-index: 1; }
         .footer-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 32px; padding-bottom: 28px; border-bottom: 1px solid rgba(255,255,255,0.2); }
         .footer-logo { display: block; }
-        .footer-logo img { height: 48px; width: auto; display: block; }
+        .footer-logo img { height: 48px; width: auto; display: block; opacity: 1; }
         .footer-nav { display: flex; flex-wrap: wrap; gap: 8px 24px; }
         .footer-nav a { color: rgba(255,255,255,0.9); text-decoration: none; font-weight: 600; font-size: 0.95em; }
         .footer-nav a:hover { color: #fff; text-decoration: underline; }
@@ -442,7 +462,10 @@ $countdownIso = $countdownTarget ? date('Y-m-d\TH:i:s', $countdownTarget) : '';
             .nav-links .hero-btn { width: 100%; text-align: center; }
             .nav-toggle { display: block; }
 
-            .hero-section { min-height: 75vh; padding-top: 70px; padding-bottom: 48px; }
+            .hero-section { min-height: 75vh; padding-top: 70px; padding-bottom: 48px; clip-path: polygon(0 0, 100% 0, 100% 96%, 0 100%); }
+            #benefity { margin-top: -8vw; padding-top: calc(88px + 8vw); }
+            .site-footer { clip-path: polygon(0 12vw, 100% 0, 100% 100%, 0 100%); padding-top: 120px; }
+            .footer-logo img { height: 40px; }
             .hero-content { padding-bottom: 32px; }
             .hero-countdown-grid { width: 100%; }
             .hero-countdown-item { flex: 1; min-width: 0; }
@@ -456,7 +479,7 @@ $countdownIso = $countdownTarget ? date('Y-m-d\TH:i:s', $countdownTarget) : '';
             .modal-left { height: 150px; flex: none; }
             .scroll-content { padding: 20px; }
             .fixed-footer { padding: 15px 20px; }
-            .site-footer { padding: 32px 18px 24px; }
+            .site-footer { padding: 120px 18px 24px; }
             .footer-top { flex-direction: column; text-align: center; gap: 24px; }
             .footer-nav { justify-content: center; }
             .footer-logo img { height: 40px; }
@@ -512,9 +535,15 @@ $countdownIso = $countdownTarget ? date('Y-m-d\TH:i:s', $countdownTarget) : '';
         </div>
     </section>
 
-    <section class="section" id="benefity">
-        <h2 class="section-title"><?= h($benefits['sectionTitle']) ?></h2>
+    <section class="section reveal-ready" id="benefity">
+        <div class="benefits-head">
+            <div class="benefits-section-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16.24 7.76l-2.83 2.83M7.76 16.24l2.83-2.83M7.76 7.76l2.83 2.83M16.24 16.24l-2.83-2.83"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
+            </div>
+            <h2 class="section-title"><?= h($benefits['sectionTitle']) ?></h2>
+        </div>
         <?php if (!empty($benefits['intro'])): ?><p><?= h($benefits['intro']) ?></p><?php endif; ?>
+        <div class="benefits-inner">
         <div class="benefits-grid">
             <?php
             $icons = [
@@ -531,25 +560,26 @@ $countdownIso = $countdownTarget ? date('Y-m-d\TH:i:s', $countdownTarget) : '';
             </div>
             <?php endfor; ?>
         </div>
+        </div>
     </section>
 
-    <section class="section" id="why" style="background: #f8f9fa;">
+    <section class="section reveal-ready" id="why" style="background: #f8f9fa;">
         <h2 class="section-title"><?= h($why['title']) ?></h2>
         <?php foreach ($why['paragraphs'] ?? [] as $p): ?><p><?= h($p) ?></p><?php endforeach; ?>
     </section>
 
-    <section class="section" id="průvodci">
+    <section class="section reveal-ready" id="průvodci">
         <h2 class="section-title"><?= h($guides['title']) ?></h2>
         <?php foreach ($guides['paragraphs'] ?? [] as $p): ?><p><?= h($p) ?></p><?php endforeach; ?>
     </section>
 
-    <section class="section" id="vychazky" style="background: #f8f9fa;">
+    <section class="section reveal-ready" id="vychazky" style="background: #f8f9fa;">
         <h2 class="section-title"><?= h($walksSection['sectionTitle']) ?></h2>
         <p><?= h($walksSection['intro']) ?></p>
         <div class="walks-grid" id="walksGrid"></div>
     </section>
 
-    <section class="section" id="faq">
+    <section class="section reveal-ready" id="faq">
         <h2 class="section-title"><?= h($faq['title']) ?></h2>
         <div class="faq-list">
             <?php foreach ($faq['items'] ?? [] as $f): ?>
@@ -561,7 +591,7 @@ $countdownIso = $countdownTarget ? date('Y-m-d\TH:i:s', $countdownTarget) : '';
         </div>
     </section>
 
-    <section class="section" id="kontakt" style="background: #f8f9fa;">
+    <section class="section reveal-ready" id="kontakt" style="background: #f8f9fa;">
         <h2 class="section-title"><?= h($contact['title']) ?></h2>
         <div class="contact-box">
             <p><?= h($contact['intro']) ?></p>
@@ -937,12 +967,25 @@ $countdownIso = $countdownTarget ? date('Y-m-d\TH:i:s', $countdownTarget) : '';
         update();
     }
 
+    // Scroll reveal – sekce se jemně objeví při scrollu
+    function initScrollReveal() {
+        var sections = document.querySelectorAll('.section.reveal-ready');
+        if (!sections.length) return;
+        var io = new IntersectionObserver(function(entries) {
+            entries.forEach(function(e) {
+                if (e.isIntersecting) e.target.classList.add('is-visible');
+            });
+        }, { rootMargin: '-6% 0px -6% 0px', threshold: 0 });
+        sections.forEach(function(s) { io.observe(s); });
+    }
+
     // Init
     changeWalk('kras');
     renderWalkCards();
     startHeroSlideshow();
     startCountdown();
     initHeaderScroll();
+    initScrollReveal();
     </script>
 </body>
 </html>
