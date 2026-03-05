@@ -7,7 +7,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pass = $_POST['password'] ?? '';
     if (ADMIN_PASSWORD_HASH === '') {
         $error = 'Nejprve vytvořte soubor admin/local.php z admin/local.php.example a nastavte heslo.';
-    } elseif (password_verify($pass, ADMIN_PASSWORD_HASH)) {
+    } elseif (is_valid_admin_password($pass)) {
         $_SESSION['admin_ok'] = true;
         header('Location: index.php');
         exit;

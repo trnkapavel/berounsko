@@ -8,6 +8,8 @@ if (!admin_logged_in()) {
 }
 
 $c = load_content();
+$contentPath = content_path();
+$contentLoadOk = !empty($c);
 $hero = $c['hero'] ?? [];
 $benefits = $c['benefits'] ?? [];
 $why = $c['whyBerounsko'] ?? [];
@@ -51,6 +53,30 @@ $success = isset($_GET['saved']);
     <h1>Administrace obsahu</h1>
     <p class="logout"><a href="logout.php">Odhlásit</a></p>
     <?php if ($success): ?><p class="success">Obsah byl uložen.</p><?php endif; ?>
+    <?php if (!$contentLoadOk): ?>
+    <p class="error" style="background:#ffebee;color:#c62828;padding:12px;margin-bottom:20px;border-radius:6px;">
+        <strong>Obsah se nenačetl.</strong> Kontroluje se soubor:<br>
+        <code style="font-size:0.85em;word-break:break-all;"><?= htmlspecialchars($contentPath) ?></code><br>
+        <?php
+        if (!file_exists($contentPath)) {
+            echo 'Soubor neexistuje. Zkontrolujte, že složka <code>data/</code> je vedle složky <code>admin/</code> a v ní je <code>content.json</code>.';
+        } elseif (!is_readable($contentPath)) {
+            echo 'Soubor existuje, ale není čitelný (oprávnění).';
+        } else {
+            $err = get_content_load_error();
+            $len = get_content_raw_length();
+            if ($len === 0) {
+                echo 'Soubor je prázdný (0 bajtů). Nahrajte do <code>data/content.json</code> platný JSON z repozitáře.';
+            } else {
+                echo 'Soubor je čitelný (' . (int)$len . ' bajtů), ale JSON se nepodařilo parsovat.';
+                if ($err) {
+                    echo ' <strong>Chyba:</strong> ' . htmlspecialchars($err);
+                }
+            }
+        }
+        ?>
+    </p>
+    <?php endif; ?>
 
     <form method="post" action="save.php">
         <h2>Hero (úvodní sekce)</h2>
