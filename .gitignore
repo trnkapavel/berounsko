@@ -1,6 +1,7 @@
 # Lokální konfigurační soubory
 config.local.php
 *.local.php
+admin/local.php
 
 # Hesla a citlivé údaje
 .env

@@ -22,7 +22,7 @@ if (file_exists(__DIR__ . '/smtp.local.php')) {
 // ============================================================
 // RATE LIMITING (max požadavků z jedné IP za časové okno)
 // ============================================================
-const RATE_LIMIT_MAX    = 5;     // max. odeslání
+const RATE_LIMIT_MAX    = 20;    // max. odeslání (pro testování; pro produkci lze snížit na 5)
 const RATE_LIMIT_WINDOW = 3600;  // za 1 hodinu (sekundy)
 
 // ============================================================
@@ -115,6 +115,10 @@ class SmtpMailer
             return true;
         } catch (\RuntimeException $e) {
             $this->close();
+            $msg = date('c') . ' ' . $e->getMessage() . "\n";
+            @file_put_contents(__DIR__ . '/smtp_error.log', $msg, FILE_APPEND | LOCK_EX);
+            $tmpLog = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'rezervace_smtp_error.log';
+            @file_put_contents($tmpLog, $msg, FILE_APPEND | LOCK_EX);
             return false;
         }
     }
@@ -252,53 +256,45 @@ class SmtpMailer
 }
 
 // ============================================================
-// NASTAVENÍ
+// NASTAVENÍ (admin e-mail a IBAN z content.json, viz níže po načtení)
 // ============================================================
-$adminEmail = "trnkapavel@gmail.com";
-$rawIban    = "CZ15 3030 0000 0011 4692 8017";
-$iban       = str_replace(' ', '', $rawIban);
-
 $googleScriptUrl = "https://script.google.com/macros/s/AKfycbzly0sIZtjukHx9EPX_9z5sgQ_0aEoUCdEEe61Y-HuBQo5vdvx9tg4_FNo8bw58fn2Fbw/exec";
+// Volitelný tajný token pro ověření požadavku v Google Apps Scriptu.
+// Nastavte stejnou hodnotu i ve skriptu; pro testování lze nechat prázdné.
+$googleScriptToken = "uKp7Xq9R3bZ1mC5vT8yH2sN4wF6gJ0L";
 
-// DATA O VYCHÁZKÁCH (centrální zdroj – nikoli z uživatelského vstupu)
-$walksData = [
-    'kras' => [
-        'name'     => 'CHKO Český kras',
-        'date_txt' => '15. 4. 2024',
-        'start'    => '20240415T100000',
-        'end'      => '20240415T140000',
-        'location' => 'Srbsko, Česká republika',
-        'guide'    => 'RNDr. Petr Skála',
-        'img'      => 'https://images.unsplash.com/photo-1605199216405-0239b35d143a?w=600&q=80',
-    ],
-    'svatojan' => [
-        'name'     => 'Svatojanský okruh',
-        'date_txt' => '22. 4. 2024',
-        'start'    => '20240422T100000',
-        'end'      => '20240422T130000',
-        'location' => 'Svatý Jan pod Skálou',
-        'guide'    => 'Mgr. Jana Veselá',
-        'img'      => 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=600&q=80',
-    ],
-    'krivoklat' => [
-        'name'     => 'CHKO Křivoklátsko',
-        'date_txt' => '12. 5. 2024',
-        'start'    => '20240512T100000',
-        'end'      => '20240512T140000',
-        'location' => 'Roztoky u Křivoklátu',
-        'guide'    => 'Ing. Karel Les',
-        'img'      => 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=600&q=80',
-    ],
-    'alkazar' => [
-        'name'     => 'Alkazar',
-        'date_txt' => '19. 5. 2024',
-        'start'    => '20240519T100000',
-        'end'      => '20240519T130000',
-        'location' => 'Hostim u Berouna',
-        'guide'    => 'Tomáš Průvodce',
-        'img'      => 'https://images.unsplash.com/photo-1560097020-591b96717792?w=600&q=80',
-    ],
-];
+// Základní URL webu – obrázky v e-mailu z vlastní domény
+$baseUrl = 'https://' . ($_SERVER['HTTP_HOST'] ?? 'registrace.berounsko.net');
+
+// Načtení obsahu z administrace (data/content.json)
+require_once __DIR__ . '/inc/content.php';
+$content = load_public_content();
+$settings = $content['settings'] ?? [];
+$adminEmail = $settings['adminEmail'] ?? 'trnkapavel@gmail.com';
+$rawIban = $settings['iban'] ?? 'CZ15 3030 0000 0011 4692 8017';
+$iban = str_replace(' ', '', $rawIban);
+
+// DATA O VYCHÁZKÁCH z content.json (fallback na výchozí)
+$walksFromContent = $content['walks']['items'] ?? [];
+$walksData = [];
+$walkPrices = []; // pricePerPerson per walk_id
+foreach (['kras', 'svatojan', 'krivoklat', 'alkazar'] as $id) {
+    $w = $walksFromContent[$id] ?? [];
+    $walksData[$id] = [
+        'name'     => $w['title'] ?? $id,
+        'date_txt' => $w['date'] ?? '',
+        'start'    => $w['start'] ?? '20240101T100000',
+        'end'      => $w['end'] ?? '20240101T140000',
+        'location' => $w['location'] ?? '',
+        'guide'    => $w['guide'] ?? '',
+        'img'      => $baseUrl . '/' . ltrim($w['img'] ?? 'img/placeholder.jpg', '/'),
+    ];
+    $walkPrices[$id] = (int)($w['pricePerPerson'] ?? 100);
+}
+if (empty($walksData)) {
+    $walksData = ['kras' => ['name' => 'Vycházka', 'date_txt' => '', 'start' => '20240101T100000', 'end' => '20240101T140000', 'location' => '', 'guide' => '', 'img' => $baseUrl . '/img/placeholder.jpg']];
+    $walkPrices = ['kras' => 0];
+}
 
 // ============================================================
 // RATE LIMIT – kontrola před zpracováním dat
@@ -330,6 +326,12 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     exit;
 }
 
+// Ochrana proti header injection (nesmí obsahovat CR/LF)
+if (preg_match('/[\r\n]/', $email)) {
+    echo json_encode(['success' => false, 'message' => 'Neplatná e-mailová adresa.']);
+    exit;
+}
+
 // count: celé číslo v rozsahu 1–20
 $count = (int)($_POST['count'] ?? 0);
 if ($count < 1 || $count > 20) {
@@ -349,9 +351,10 @@ $hWalkDate = h($walkDateTxt);
 $hGuide    = h($info['guide']);
 $hLocation = h($info['location']);
 $hRawIban  = h($rawIban);
+$hImg      = h($info['img']);
 
-// Ceny
-$pricePerPerson = ($walkId === 'kras') ? 0 : 100;
+// Ceny (z content.json)
+$pricePerPerson = $walkPrices[$walkId] ?? 100;
 $totalPrice     = $count * $pricePerPerson;
 $currentYear    = date('Y');
 
@@ -378,6 +381,7 @@ if (!empty($googleScriptUrl)) {
         'count'   => $count,
         'price'   => $totalPrice,
         'qr_link' => $qrUrl,
+        'token'   => $googleScriptToken,
     ];
     $ch = curl_init($googleScriptUrl);
     curl_setopt($ch, CURLOPT_POSTFIELDS,     json_encode($sheetData));
@@ -447,7 +451,7 @@ $htmlClient = <<<HTML
             <h1>Rezervace potvrzena</h1>
         </div>
 
-        <img src="{$info['img']}" alt="{$hWalkName}" class="hero-image">
+        <img src="{$hImg}" alt="{$hWalkName}" class="hero-image">
 
         <div class="content">
             <h2 style="color: #30B0FF; margin-top: 0;">Dobrý den,</h2>

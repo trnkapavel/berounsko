@@ -1,0 +1,9 @@
+<?php
+/**
+ * Admin heslo – zkopírujte jako admin/local.php a nastavte vlastní heslo.
+ * Soubor local.php je v .gitignore.
+ *
+ * Výchozí heslo (pokud níže nezměníte): admin
+ * Vygenerování nového hashe (v PHP): echo password_hash('VaseHeslo', PASSWORD_DEFAULT);
+ */
+define('ADMIN_PASSWORD_HASH', '$2y$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy');

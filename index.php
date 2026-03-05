@@ -1,3 +1,33 @@
+<?php
+require_once __DIR__ . '/inc/content.php';
+$c = load_public_content();
+$hero = array_merge(['title' => 'Komentované vycházky přírodou', 'subtitle' => 'Objevte Berounsko, Český kras a Křivoklátsko s odborným výkladem. Rezervujte si místo na procházce.'], $c['hero'] ?? []);
+$benefits = array_merge(['sectionTitle' => 'Proč komentované procházky?', 'intro' => '', 'items' => []], $c['benefits'] ?? []);
+$why = array_merge(['title' => 'Proč to dělá Berounsko?', 'paragraphs' => []], $c['whyBerounsko'] ?? []);
+$guides = array_merge(['title' => 'Kdo vás provede', 'paragraphs' => []], $c['guides'] ?? []);
+$walksData = $c['walks'] ?? [];
+$walksSection = array_merge(['sectionTitle' => 'Aktuální vycházky a registrace', 'intro' => 'Vyberte si trasu a zaregistrujte se.'], $walksData);
+$walksItems = $walksSection['items'] ?? [];
+$faq = array_merge(['title' => 'Časté dotazy', 'items' => []], $c['faq'] ?? []);
+$contact = array_merge(['title' => 'Kontakt', 'intro' => 'Máte dotaz k vycházkám nebo spolupráci? Napište nám.', 'email' => 'info@berounsko.net'], $c['contact'] ?? []);
+$footer = array_merge(['text' => '© 2026 Berounsko.net – Komentované vycházky po Berounsku, Českém krasu a Křivoklátsku.'], $c['footer'] ?? []);
+// Data vycházek pro JS (stejná struktura jako dříve)
+$walksForJs = [];
+foreach (['kras' => 'kras', 'svatojan' => 'svatojan', 'krivoklat' => 'krivoklat', 'alkazar' => 'alkazar'] as $id) {
+    $w = $walksItems[$id] ?? [];
+    $walksForJs[$id] = [
+        'title' => $w['title'] ?? '',
+        'img' => $w['img'] ?? 'img/placeholder.jpg',
+        'guide' => $w['guide'] ?? '',
+        'date' => $w['date'] ?? '',
+        'distance' => $w['distance'] ?? '',
+        'difficulty' => (int)($w['difficulty'] ?? 3),
+        'pricePerPerson' => (int)($w['pricePerPerson'] ?? 0),
+        'desc' => $w['desc'] ?? [],
+    ];
+}
+function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
+?>
 <!DOCTYPE html>
 <html lang="cs">
 <head>
@@ -44,24 +74,38 @@
         .hero-section {
             background-image: url('https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1600&q=80');
             background-size: cover; background-position: center;
-            height: 100vh; display: flex; align-items: center; justify-content: center; position: relative;
+            min-height: 85vh; display: flex; align-items: center; justify-content: center; position: relative;
         }
-        .hero-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); }
-        .hero-content { position: relative; z-index: 1; text-align: center; color: white; animation: slideInUp 0.8s ease-out; }
-        .hero-title { font-size: 3em; font-weight: 700; margin-bottom: 30px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        .hero-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(25,46,124,0.45); }
+        .hero-content { position: relative; z-index: 1; text-align: center; color: white; animation: slideInUp 0.8s ease-out; padding: 0 20px; }
+        .hero-title { font-size: clamp(2.2rem, 5vw, 4rem); font-weight: 700; margin-bottom: 24px; text-shadow: 0 2px 20px rgba(0,0,0,0.5); line-height: 1.15; }
+        .hero-subtitle { font-size: clamp(1.15rem, 2.2vw, 1.5rem); margin-bottom: 36px; max-width: 560px; margin-left: auto; margin-right: auto; opacity: 0.95; line-height: 1.5; }
 
+        /* Hlavní CTA – zelená jako „Další místa“ na referenčním webu */
         .hero-btn {
-            padding: 20px 50px; font-size: 1.3em; background-color: #30B0FF; color: white;
-            border: none; border-radius: 50px; cursor: pointer; font-weight: 600;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            padding: 18px 44px; font-size: 1.15em; background-color: var(--c-green);
+            color: white; border: none; border-radius: 50px; cursor: pointer; font-weight: 600;
+            box-shadow: 0 4px 16px rgba(146,190,68,0.35);
             transition: transform 0.3s, background-color 0.2s;
             text-transform: uppercase; letter-spacing: 1px;
         }
-        .hero-btn:hover { transform: scale(1.05) translateY(-3px); background-color: #2090dd; }
+        .hero-btn:hover { transform: scale(1.05) translateY(-3px); background-color: #7cc936; }
 
-        /* --- 2. PROMĚNNÉ --- */
+        /* --- 2. BAREVNÁ PALETA BEROUNSKO --- */
         :root {
-            --c-blue: #30B0FF; --c-green: #80C024; --c-orange: #FF9200; --c-red: #FF4444; --c-text: #000000;
+            /* primární tmavě modrá – navigace, patička */
+            --c-dark: #192e7c;
+            /* světlejší modrá – akcent, tlačítka */
+            --c-accent: #68acf9;
+            /* pomocné odstíny modré pro texty/pozadí */
+            --c-navy: #192e7c;
+            --c-muted: #68acf9;
+            /* zelená a oranžová z palety */
+            --c-blue: #68acf9;
+            --c-green: #92be44;
+            --c-orange: #ea9b34;
+            --c-red: #FF4444;
+            --c-text: #1a1a1a;
             --font-main: 'Montserrat', sans-serif;
         }
 
@@ -133,7 +177,7 @@
         }
         .close-modal:hover { color: var(--c-red); background: #fff; }
 
-        h2 { font-weight: 600; margin-bottom: 20px; color: var(--c-blue); margin-top: 0; }
+        h2 { font-weight: 600; margin-bottom: 20px; color: var(--c-dark); margin-top: 0; }
         
         /* --- 4. PŘEPÍNAČE --- */
         .walk-selector { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
@@ -155,7 +199,7 @@
         .hidden-content-wrapper.is-open { max-height: 500px; opacity: 1; }
         
         .toggle-details-btn {
-            color: var(--c-blue); font-weight: 600; font-size: 0.9em;
+            color: var(--c-accent); font-weight: 600; font-size: 0.9em;
             cursor: pointer; display: inline-block; margin-left: 20px; margin-bottom: 20px;
             text-decoration: underline;
         }
@@ -163,7 +207,7 @@
         /* --- 6. INFO ROW --- */
         .info-row {
             background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;
-            border-left: 4px solid var(--c-blue);
+            border-left: 4px solid var(--c-accent);
             display: grid; grid-template-columns: 1fr 1fr; gap: 15px;
         }
         .info-item { display: flex; flex-direction: column; }
@@ -193,11 +237,11 @@
             font-size: 1.4em; font-weight: 600; color: var(--c-green); text-align: center; margin-bottom: 15px;
         }
         .btn-submit {
-            background: var(--c-blue); color: white; border: none; padding: 15px;
+            background: var(--c-green); color: white; border: none; padding: 15px;
             width: 100%; font-size: 1.1em; font-weight: 600; border-radius: 6px; cursor: pointer;
             transition: background 0.3s;
         }
-        .btn-submit:hover { background: #2090dd; }
+        .btn-submit:hover { background: #7cc936; }
         .btn-submit:disabled { background: #ccc; cursor: not-allowed; }
 
         /* --- 9. SUCCESS STAV --- */
@@ -225,12 +269,117 @@
         }
         .success-text h3 { color: #80C024; font-size: 1.8em; margin: 0 0 10px 0; }
 
-        /* --- 10. RESPONZIVITA --- */
+        /* --- 10. LANDING PAGE: HEADER (paleta Berounsko) --- */
+        .site-header {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            background: var(--c-dark);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.2);
+            padding: 14px 28px; display: flex; align-items: center; justify-content: space-between;
+        }
+        .logo { font-size: 1.35em; font-weight: 700; color: #fff; text-decoration: none; letter-spacing: -0.5px; }
+        .logo:hover { color: #e0e0e0; }
+        .logo img { height: 42px; display: block; }
+        .nav-links { display: flex; align-items: center; gap: 28px; }
+        .nav-links a { color: rgba(255,255,255,0.9); text-decoration: none; font-weight: 600; font-size: 0.95em; }
+        .nav-links a:hover { color: #fff; }
+        .nav-links .hero-btn { background: var(--c-green); padding: 10px 22px; font-size: 0.9em; }
+
+        .nav-toggle {
+            display: none;
+            cursor: pointer;
+            color: #fff;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.35);
+            border-radius: 999px;
+            padding: 6px 10px;
+        }
+        .nav-toggle svg {
+            width: 24px;
+            height: 24px;
+            stroke-width: 2.4;
+        }
+
+        /* --- 11. LANDING SECTIONS (větší, výraznější) --- */
+        .section { padding: 88px 28px; max-width: 1000px; margin: 0 auto; }
+        .section-title { font-size: clamp(1.75rem, 3vw, 2.25rem); font-weight: 700; color: var(--c-dark); margin-bottom: 32px; text-align: center; }
+        .section > p { line-height: 1.75; color: #444; margin-bottom: 20px; font-size: 1.05em; }
+        .section ul { padding-left: 22px; line-height: 1.8; color: #444; }
+
+        /* Benefity – boxy s ikonami (4 v řadě na desktopu) */
+        .benefits-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 44px; }
+        .benefit-card {
+            background: #fff; padding: 32px 28px; border-radius: 16px;
+            box-shadow: 0 6px 24px rgba(25,46,124,0.08); border: 1px solid rgba(25,46,124,0.12);
+            text-align: center; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .benefit-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(31,58,102,0.12); }
+        .benefit-icon { width: 56px; height: 56px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; background: rgba(104,172,249,0.12); border-radius: 14px; color: var(--c-accent); }
+        .benefit-card strong { display: block; color: var(--c-dark); font-size: 1.1em; margin-bottom: 10px; }
+        .benefit-card span { color: #555; font-size: 0.95em; line-height: 1.55; }
+
+        /* Vycházky – velké karty pod sebou */
+        .walks-grid { display: flex; flex-direction: column; gap: 28px; margin-top: 40px; max-width: 820px; margin-left: auto; margin-right: auto; }
+        .walk-card {
+            background: #fff; border-radius: 16px; overflow: hidden;
+            box-shadow: 0 6px 28px rgba(0,0,0,0.08); border: 1px solid #eee;
+            display: grid; grid-template-columns: 320px 1fr; min-height: 220px; transition: box-shadow 0.2s;
+        }
+        .walk-card:hover { box-shadow: 0 10px 36px rgba(25,46,124,0.12); }
+        .walk-card-image { min-height: 220px; background-size: cover; background-position: center; }
+        .walk-card-body { padding: 28px 32px; display: flex; flex-direction: column; justify-content: space-between; }
+        .walk-card-title { font-size: 1.4em; font-weight: 700; color: var(--c-dark); margin-bottom: 10px; }
+        .walk-card-meta { font-size: 0.95em; color: #555; margin-bottom: 12px; line-height: 1.5; }
+        .walk-card-desc { font-size: 0.95em; color: #666; line-height: 1.55; margin-bottom: 20px; flex: 1; }
+        .walk-card .hero-btn { align-self: flex-start; padding: 14px 28px; font-size: 1em; }
+
+        /* FAQ rozbalovací */
+        .faq-list { max-width: 700px; margin: 0 auto; }
+        .faq-item { border: 1px solid #e5e5e5; border-radius: 12px; margin-bottom: 12px; overflow: hidden; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .faq-q { font-weight: 600; color: var(--c-dark); padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 1.05em; }
+        .faq-q:hover { background: #fafafa; }
+        .faq-q::after { content: '+'; font-size: 1.4em; color: var(--c-accent); font-weight: 400; transition: transform 0.25s; }
+        .faq-item.is-open .faq-q::after { transform: rotate(45deg); }
+        .faq-a { color: #555; line-height: 1.65; font-size: 0.98em; padding: 0 24px; max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; }
+        .faq-item.is-open .faq-a { max-height: 280px; padding: 0 24px 20px; }
+
+        .contact-box { background: linear-gradient(135deg, rgba(25,46,124,0.05) 0%, rgba(104,172,249,0.08) 100%); padding: 40px; border-radius: 16px; text-align: center; max-width: 520px; margin: 0 auto; border: 1px solid rgba(25,46,124,0.15); }
+        .contact-box a { color: var(--c-accent); font-weight: 600; text-decoration: none; font-size: 1.1em; }
+        .contact-box a:hover { text-decoration: underline; }
+
+        .site-footer { background: var(--c-dark); color: rgba(255,255,255,0.75); text-align: center; padding: 28px 24px; font-size: 0.95em; margin-top: 80px; }
+
+        /* --- 12. RESPONZIVITA --- */
+        @media (max-width: 900px) {
+            .benefits-grid { grid-template-columns: repeat(2, 1fr); }
+        }
         @media (max-width: 768px) {
-            .hero-title { font-size: 2em; padding: 0 20px; }
+            .site-header { padding: 10px 16px; }
+            .nav-links {
+                position: absolute;
+                top: 100%;
+                right: 0;
+                background: var(--c-dark);
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+                padding: 12px 16px 16px;
+                min-width: 180px;
+                box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+                display: none;
+            }
+            .nav-links.is-open { display: flex; }
+            .nav-links .hero-btn { width: 100%; text-align: center; }
+            .nav-toggle { display: block; }
+
+            .hero-section { min-height: 75vh; padding-top: 70px; }
+            .nav-links { gap: 14px; font-size: 0.9em; }
+            .section { padding: 56px 18px; }
+            .benefits-grid { grid-template-columns: 1fr; gap: 20px; }
+            .walk-card { grid-template-columns: 1fr; min-height: auto; }
+            .walk-card-image { min-height: 200px; }
+            .walk-card-body { padding: 22px; }
             .modal-window { flex-direction: column; width: 95%; max-height: 95vh; }
             .modal-left { height: 150px; flex: none; }
-            /* Na mobilu chceme taky scroll */
             .scroll-content { padding: 20px; }
             .fixed-footer { padding: 15px 20px; }
         }
@@ -238,13 +387,93 @@
 </head>
 <body>
 
-    <div class="hero-section">
+    <header class="site-header">
+        <a href="#uvod" class="logo" aria-label="Berounsko.net – úvod">
+            <!-- Logo: nahraďte src cestou k obrázku, např. img/logo.png -->
+            <span>Berounsko.net</span>
+        </a>
+        <nav class="nav-links" id="mainNav">
+            <a href="#vychazky">Vycházky</a>
+            <a href="#faq">FAQ</a>
+            <a href="#kontakt">Kontakt</a>
+            <button class="hero-btn" onclick="openModal()" style="padding: 10px 24px; font-size: 0.9em;">Rezervovat</button>
+        </nav>
+        <button class="nav-toggle" type="button" aria-label="Menu" onclick="toggleNav()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 6h18M3 12h18M3 18h18"/>
+            </svg>
+        </button>
+    </header>
+
+    <section class="hero-section" id="uvod">
         <div class="hero-overlay"></div>
         <div class="hero-content">
-            <div class="hero-title">Komentované vycházky přírodou</div>
+            <h1 class="hero-title"><?= h($hero['title']) ?></h1>
+            <p class="hero-subtitle"><?= h($hero['subtitle']) ?></p>
             <button class="hero-btn" onclick="openModal()">Rezervovat vycházku</button>
         </div>
-    </div>
+    </section>
+
+    <section class="section" id="benefity">
+        <h2 class="section-title"><?= h($benefits['sectionTitle']) ?></h2>
+        <?php if (!empty($benefits['intro'])): ?><p><?= h($benefits['intro']) ?></p><?php endif; ?>
+        <div class="benefits-grid">
+            <?php
+            $icons = [
+                '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M8 7h8"/><path d="M8 11h8"/></svg>',
+                '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+                '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+                '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
+            ];
+            for ($i = 0; $i < 4; $i++): $b = $benefits['items'][$i] ?? ['title'=>'','text'=>'']; ?>
+            <div class="benefit-card">
+                <div class="benefit-icon" aria-hidden="true"><?= $icons[$i] ?></div>
+                <strong><?= h($b['title']) ?></strong>
+                <span><?= h($b['text']) ?></span>
+            </div>
+            <?php endfor; ?>
+        </div>
+    </section>
+
+    <section class="section" style="background: #f8f9fa;">
+        <h2 class="section-title"><?= h($why['title']) ?></h2>
+        <?php foreach ($why['paragraphs'] ?? [] as $p): ?><p><?= h($p) ?></p><?php endforeach; ?>
+    </section>
+
+    <section class="section" id="průvodci">
+        <h2 class="section-title"><?= h($guides['title']) ?></h2>
+        <?php foreach ($guides['paragraphs'] ?? [] as $p): ?><p><?= h($p) ?></p><?php endforeach; ?>
+    </section>
+
+    <section class="section" id="vychazky" style="background: #f8f9fa;">
+        <h2 class="section-title"><?= h($walksSection['sectionTitle']) ?></h2>
+        <p><?= h($walksSection['intro']) ?></p>
+        <div class="walks-grid" id="walksGrid"></div>
+    </section>
+
+    <section class="section" id="faq">
+        <h2 class="section-title"><?= h($faq['title']) ?></h2>
+        <div class="faq-list">
+            <?php foreach ($faq['items'] ?? [] as $f): ?>
+            <div class="faq-item">
+                <div class="faq-q" onclick="toggleFaq(this)"><?= h($f['q']) ?></div>
+                <div class="faq-a"><?= nl2br(h($f['a'])) ?></div>
+            </div>
+            <?php endforeach; ?>
+        </div>
+    </section>
+
+    <section class="section" id="kontakt" style="background: #f8f9fa;">
+        <h2 class="section-title"><?= h($contact['title']) ?></h2>
+        <div class="contact-box">
+            <p><?= h($contact['intro']) ?></p>
+            <p><a href="mailto:<?= h($contact['email']) ?>"><?= h($contact['email']) ?></a></p>
+        </div>
+    </section>
+
+    <footer class="site-footer">
+        <?= h($footer['text']) ?>
+    </footer>
 
     <div id="bookingModal" class="modal-overlay">
         <div class="modal-window">
@@ -326,90 +555,14 @@
     </div>
 
     <script>
-    // DATA PROCHÁZEK
-    const walks = {
-        'kras': {
-            title: 'Okruh Srbsko, Chlum',
-            img: 'img/srbsko-chlum.jpg', 
-            guide: 'Martin Majer (fotograf, jeskyňář, autor publikací) a Jan Holeček (hydrogeolog)',
-            date: '18. 4. 2026',
-            distance: '4 km',
-            difficulty: 4, 
-            pricePerPerson: 0,
-            desc: [
-                'Srbsko – Hájkova rokle – Chlum – Hostim – Srbsko, okruh méně známými oblastmi Českého krasu.', 
-                'Hájkova rokle a okolní lesy a skály, pestrá krajina a výhledy.',
-                'Možnost pozorovat první jarní, kvetoucí rostliny a proměny přírody.',
-                'Výklad o přírodě, krajině a geologickém vývoji Českého krasu.',
-                'Souvislosti mezi geologickým podložím, půdou, klimatem a vegetací.',
-                'Vnímání krajiny v širších souvislostech a šetrný pohyb v chráněném území.'
-            ]
-        },
-        'svatojan': {
-            title: 'Svatojanský okruh',
-            img: 'img/svatojansky-okruh.jpg', 
-            guide: 'František Zima',
-            date: '16. 5. 2026',
-            distance: '4 km',
-            difficulty: 4, 
-            pricePerPerson: 100,
-            desc: [
-                'Český kras jako „přírodní botanická zahrada Čech" – největší vápencové území v Čechách.',
-                'Vývoj krajiny Českého krasu a vztah geologického podloží, půdy, klimatu a biodiverzity.',
-                'Rostlinná společenstva a konkrétní zástupci flóry, pozorování vegetace přímo v terénu.',
-                'Souvislosti v přírodě: fotosyntéza, rovnováha ekosystémů, vazby mezi organismy.',
-                'Krajina jako zdroj inspirace pro vědce, umělce i návštěvníky.',
-                'Vztah člověka a přírody, odpovědnost za krajinu nejen z ekonomického hlediska.'
-            ]
-        },
-        'krivoklat': {
-            title: 'Brdatka',
-            img: 'img/brdatka.jpg', 
-            guide: 'Markéta Hrnčálová',
-            date: 'datum bude upřesněno',
-            distance: '9,5 km',
-            difficulty: 3, 
-            pricePerPerson: 100,
-            desc: [
-                'Ochrana přírody a krajiny v oblasti Křivoklátska, význam chráněných území a šetrného pohybu v přírodě.',
-                'Ochrana kulturních památek a historické krajiny, soužití člověka a lesa v průběhu staletí.',
-                'Historie regionu na příkladu hradu Křivoklát – význam loveckých hvozdů a královských lesů.',
-                'Přírodní rezervace Brdatka – ukázka cenných lesních porostů a přirozených ekosystémů.',
-                'Hamouzův statek – doklad tradičního venkovského hospodaření a vztahu člověka k půdě.',
-                'Proměny krajiny v čase a vliv hospodaření, lesnictví a osídlení na dnešní podobu Křivoklátska.'
-            ]
-        },
-        'alkazar': {
-            title: 'Alkazar',
-            img: 'img/alkazar.jpg', 
-            guide: 'Martin Majer (fotograf, jeskyňář, autor publikací) a Jan Holeček (hydrogeolog)',
-            date: 'datum bude upřesněno',
-            distance: '4 km',
-            difficulty: 1, 
-            pricePerPerson: 100,
-            desc: [
-                'CHKO Český kras – krajina vápencových skal, lomů a krasových jevů v okolí Berounky.',
-                'Z Berouna podél řeky do osady V Kozle, klidné údolí.',
-                'Alkazar – bývalé vápencové lomy, stopy těžby a proměny krajiny vlivem člověka.',
-                'Krasové jevy a jeskyně, geologický vývoj území a vznik vápencových skal.',
-                'Vztah člověka a přírody: těžba vápence, využívání krajiny a její dnešní ochrana.',
-                'Zajímavosti o místní přírodě, vegetaci a živočiších vázaných na skalní a lesní prostředí.'
-            ]
-        }
-    };
+    // DATA PROCHÁZEK (z administrace / data/content.json)
+    const walks = <?= json_encode($walksForJs, JSON_UNESCAPED_UNICODE) ?>;
 
     // Inicializace
     const select = document.getElementById('participantCount');
     for (let i = 1; i <= 20; i++) {
         let opt = document.createElement('option');
         opt.value = i; opt.innerHTML = i; select.appendChild(opt);
-    }
-
-    // Otevření
-    function openModal() {
-        const modal = document.getElementById('bookingModal');
-        modal.style.display = 'flex';
-        setTimeout(() => { modal.classList.add('is-visible'); }, 10);
     }
 
     // Zavření a reset
@@ -551,8 +704,60 @@
         });
     }
 
+    // Otevření modalu – volitelně s předvybranou vycházkou (id z walks)
+    function openModal(walkId) {
+        const modal = document.getElementById('bookingModal');
+        modal.style.display = 'flex';
+        setTimeout(() => { modal.classList.add('is-visible'); }, 10);
+        if (walkId && walks[walkId]) {
+            changeWalk(walkId);
+        } else {
+            const currentId = document.getElementById('inputWalkId').value;
+            const imgUrl = walks[currentId].img;
+            const imgDiv = document.getElementById('modalImage');
+            setTimeout(() => { imgDiv.style.backgroundImage = `url('${imgUrl}')`; }, 50);
+        }
+    }
+
+    // Vygenerování karet vycházek na landing page (velké karty pod sebou, víc informací)
+    function renderWalkCards() {
+        const grid = document.getElementById('walksGrid');
+        if (!grid) return;
+        const ids = ['kras', 'svatojan', 'krivoklat', 'alkazar'];
+        grid.innerHTML = ids.map(id => {
+            const w = walks[id];
+            const priceText = w.pricePerPerson === 0 ? 'Zdarma' : w.pricePerPerson + ' Kč / osoba';
+            const firstLine = w.desc && w.desc[0] ? w.desc[0] : '';
+            return `
+                <div class="walk-card">
+                    <div class="walk-card-image" style="background-image: url('${w.img}');"></div>
+                    <div class="walk-card-body">
+                        <div class="walk-card-title">${w.title}</div>
+                        <div class="walk-card-meta">${w.date} · ${w.distance} · ${priceText}<br>Průvodce: ${w.guide}</div>
+                        ${firstLine ? `<div class="walk-card-desc">${firstLine}</div>` : ''}
+                        <button class="hero-btn" type="button" onclick="openModal('${id}')">Rezervovat místo</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // FAQ rozbalení / sbalení
+    function toggleFaq(el) {
+        const item = el.closest('.faq-item');
+        item.classList.toggle('is-open');
+    }
+
+    // Mobilní menu
+    function toggleNav() {
+        const nav = document.getElementById('mainNav');
+        if (!nav) return;
+        nav.classList.toggle('is-open');
+    }
+
     // Init
     changeWalk('kras');
+    renderWalkCards();
     </script>
 </body>
 </html>

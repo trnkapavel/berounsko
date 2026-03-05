@@ -1,0 +1,137 @@
+{
+  "hero": {
+    "title": "Komentované vycházky přírodou",
+    "subtitle": "Objevte Berounsko, Český kras a Křivoklátsko s odborným výkladem. Rezervujte si místo na procházce."
+  },
+  "benefits": {
+    "sectionTitle": "Proč komentované procházky?",
+    "intro": "Komentované vycházky jsou skvělý způsob, jak poznat přírodu a krajinu jinak než jen „z cesty“. S průvodcem se dozvíte souvislosti o geologii, rostlinách, historii a ochraně přírody a uvidíte místa, která byste sami přehlédli.",
+    "items": [
+      { "title": "Odborný výklad", "text": "Geologie, flóra, fauna a historie od zkušených průvodců." },
+      { "title": "Bezpečný pohyb", "text": "Trasy v chráněných územích šetrně a podle pravidel." },
+      { "title": "Skupina i rodiny", "text": "Vhodné pro jednotlivce, páry i rodiny s dětmi." },
+      { "title": "Krajina na vlastní oči", "text": "Pozorování přírody v terénu, ne jen z obrazovky." }
+    ]
+  },
+  "whyBerounsko": {
+    "title": "Proč to dělá Berounsko?",
+    "paragraphs": [
+      "Berounsko.net propojuje zájemce o přírodu a krajinu s odborníky a místními průvodci. Chceme, aby lidé lépe znali a chránili region Českého krasu a Křivoklátska – a komentované vycházky jsou jeden z nejlepších způsobů, jak to zažít na vlastní kůži.",
+      "Vycházky pořádáme v souladu s ochranou přírody a s respektem k místním komunitám. Část tras je zdarma, u placených jde výtěžek do pokrytí nákladů a dalšího rozvoje programu."
+    ]
+  },
+  "guides": {
+    "title": "Kdo vás provede",
+    "paragraphs": [
+      "Na vycházkách vás doprovázejí zkušení průvodci: přírodovědci, hydrogeologové, fotografové a znalci regionu. Kombinují odborné znalosti s láskou k místní krajině a umí přiblížit přírodu i historii srozumitelně a poutavě.",
+      "Na každé trase je uveden konkrétní průvodce nebo dvojice – jejich profily a zaměření najdete u jednotlivých vycházek."
+    ]
+  },
+  "walks": {
+    "sectionTitle": "Aktuální vycházky a registrace",
+    "intro": "Vyberte si trasu a zaregistrujte se. Po odeslání rezervace vám přijde e-mail s potvrzením a případně platebními údaji a pozvánkou do kalendáře.",
+    "items": {
+      "kras": {
+        "title": "Okruh Srbsko, Chlum",
+        "img": "img/srbsko-chlum.jpg",
+        "guide": "Martin Majer (fotograf, jeskyňář, autor publikací) a Jan Holeček (hydrogeolog)",
+        "date": "18. 4. 2026",
+        "distance": "4 km",
+        "difficulty": 4,
+        "pricePerPerson": 0,
+        "start": "20260418T100000",
+        "end": "20260418T140000",
+        "location": "Srbsko, Česká republika",
+        "desc": [
+          "Srbsko – Hájkova rokle – Chlum – Hostim – Srbsko, okruh méně známými oblastmi Českého krasu.",
+          "Hájkova rokle a okolní lesy a skály, pestrá krajina a výhledy.",
+          "Možnost pozorovat první jarní, kvetoucí rostliny a proměny přírody.",
+          "Výklad o přírodě, krajině a geologickém vývoji Českého krasu.",
+          "Souvislosti mezi geologickým podložím, půdou, klimatem a vegetací.",
+          "Vnímání krajiny v širších souvislostech a šetrný pohyb v chráněném území."
+        ]
+      },
+      "svatojan": {
+        "title": "Svatojanský okruh",
+        "img": "img/svatojansky-okruh.jpg",
+        "guide": "František Zima",
+        "date": "16. 5. 2026",
+        "distance": "4 km",
+        "difficulty": 4,
+        "pricePerPerson": 100,
+        "start": "20260516T100000",
+        "end": "20260516T130000",
+        "location": "Svatý Jan pod Skálou",
+        "desc": [
+          "Český kras jako „přírodní botanická zahrada Čech" – největší vápencové území v Čechách.",
+          "Vývoj krajiny Českého krasu a vztah geologického podloží, půdy, klimatu a biodiverzity.",
+          "Rostlinná společenstva a konkrétní zástupci flóry, pozorování vegetace přímo v terénu.",
+          "Souvislosti v přírodě: fotosyntéza, rovnováha ekosystémů, vazby mezi organismy.",
+          "Krajina jako zdroj inspirace pro vědce, umělce i návštěvníky.",
+          "Vztah člověka a přírody, odpovědnost za krajinu nejen z ekonomického hlediska."
+        ]
+      },
+      "krivoklat": {
+        "title": "Brdatka",
+        "img": "img/brdatka.jpg",
+        "guide": "Markéta Hrnčálová",
+        "date": "datum bude upřesněno",
+        "distance": "9,5 km",
+        "difficulty": 3,
+        "pricePerPerson": 100,
+        "start": "20260512T100000",
+        "end": "20260512T140000",
+        "location": "Roztoky u Křivoklátu",
+        "desc": [
+          "Ochrana přírody a krajiny v oblasti Křivoklátska, význam chráněných území a šetrného pohybu v přírodě.",
+          "Ochrana kulturních památek a historické krajiny, soužití člověka a lesa v průběhu staletí.",
+          "Historie regionu na příkladu hradu Křivoklát – význam loveckých hvozdů a královských lesů.",
+          "Přírodní rezervace Brdatka – ukázka cenných lesních porostů a přirozených ekosystémů.",
+          "Hamouzův statek – doklad tradičního venkovského hospodaření a vztahu člověka k půdě.",
+          "Proměny krajiny v čase a vliv hospodaření, lesnictví a osídlení na dnešní podobu Křivoklátska."
+        ]
+      },
+      "alkazar": {
+        "title": "Alkazar",
+        "img": "img/alkazar.jpg",
+        "guide": "Martin Majer (fotograf, jeskyňář, autor publikací) a Jan Holeček (hydrogeolog)",
+        "date": "datum bude upřesněno",
+        "distance": "4 km",
+        "difficulty": 1,
+        "pricePerPerson": 100,
+        "start": "20260519T100000",
+        "end": "20260519T130000",
+        "location": "Hostim u Berouna",
+        "desc": [
+          "CHKO Český kras – krajina vápencových skal, lomů a krasových jevů v okolí Berounky.",
+          "Z Berouna podél řeky do osady V Kozle, klidné údolí.",
+          "Alkazar – bývalé vápencové lomy, stopy těžby a proměny krajiny vlivem člověka.",
+          "Krasové jevy a jeskyně, geologický vývoj území a vznik vápencových skal.",
+          "Vztah člověka a přírody: těžba vápence, využívání krajiny a její dnešní ochrana.",
+          "Zajímavosti o místní přírodě, vegetaci a živočiších vázaných na skalní a lesní prostředí."
+        ]
+      }
+    }
+  },
+  "faq": {
+    "title": "Časté dotazy",
+    "items": [
+      { "q": "Musím se na vycházku registrovat?", "a": "Ano. Kapacita je omezená, abychom zachovali kvalitu výkladu a šetrný pohyb v přírodě. Rezervace je závazná po potvrzení e-mailem." },
+      { "q": "Co když prší?", "a": "V případě extrémního počasí vás budeme kontaktovat a domluvíme náhradní termín nebo vrácení platby. Lehký déšť vycházku neznamená zrušení." },
+      { "q": "Je vycházka vhodná pro děti?", "a": "Záleží na trase – u každé vycházky je uvedena délka a náročnost. Kratší a méně náročné trasy (např. Alkazar) zvládnou i rodiny s menšími dětmi." },
+      { "q": "Jak platím?", "a": "Po registraci obdržíte e-mail s platebními údaji a QR kódem. Některé vycházky jsou zdarma." }
+    ]
+  },
+  "contact": {
+    "title": "Kontakt",
+    "intro": "Máte dotaz k vycházkám nebo spolupráci? Napište nám.",
+    "email": "info@berounsko.net"
+  },
+  "footer": {
+    "text": "© 2026 Berounsko.net – Komentované vycházky po Berounsku, Českém krasu a Křivoklátsku."
+  },
+  "settings": {
+    "adminEmail": "trnkapavel@gmail.com",
+    "iban": "CZ15 3030 0000 0011 4692 8017"
+  }
+}
