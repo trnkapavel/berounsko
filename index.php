@@ -358,12 +358,9 @@ $countdownIso = $countdownTarget ? date('Y-m-d\TH:i:s', $countdownTarget) : '';
 
         /* --- 11. LANDING SECTIONS (větší, výraznější, překryvy) --- */
         .section { padding: 88px 28px; max-width: 1000px; margin: 0 auto; position: relative; }
-        /* První sekce pod hero – překrývá šikmý okraj, velký radius, ikona */
-        #benefity { margin-top: -5vw; padding-top: calc(32px + 2vw); z-index: 2; background: #fff; box-shadow: 0 -10px 40px rgba(0,0,0,0.06); border-radius: 20px; overflow: hidden; }
+        /* První sekce pod hero – překrývá šikmý okraj, ostré rohy */
+        #benefity { margin-top: -5vw; padding-top: calc(32px + 2vw); z-index: 2; background: #fff; box-shadow: 0 -10px 40px rgba(0,0,0,0.06); }
         #benefity .benefits-inner { padding: 0; }
-        .benefits-head { text-align: center; margin-bottom: 24px; display: flex; flex-direction: column; align-items: center; width: 100%; padding: 0; }
-        .benefits-section-icon { display: flex; align-items: center; justify-content: center; width: 120px; height: 120px; margin-bottom: 12px; background: linear-gradient(135deg, rgba(104,172,249,0.2) 0%, rgba(25,46,124,0.12) 100%); border-radius: 28px; color: var(--c-dark); }
-        .benefits-section-icon svg { width: 64px; height: 64px; }
         #benefity .section-title { margin-bottom: 12px; margin-top: 0; }
         #benefity > p { padding: 0 28px; }
         /* Druhá šikmá hrana – sekce „Proč Berounsko“ má šikmý horní okraj */
@@ -535,12 +532,7 @@ $countdownIso = $countdownTarget ? date('Y-m-d\TH:i:s', $countdownTarget) : '';
     </section>
 
     <section class="section reveal-ready" id="benefity">
-        <div class="benefits-head">
-            <div class="benefits-section-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16.24 7.76l-2.83 2.83M7.76 16.24l2.83-2.83M7.76 7.76l2.83 2.83M16.24 16.24l-2.83-2.83"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
-            </div>
-            <h2 class="section-title"><?= h($benefits['sectionTitle']) ?></h2>
-        </div>
+        <h2 class="section-title"><?= h($benefits['sectionTitle']) ?></h2>
         <?php if (!empty($benefits['intro'])): ?><p><?= h($benefits['intro']) ?></p><?php endif; ?>
         <div class="benefits-inner">
         <div class="benefits-grid">
